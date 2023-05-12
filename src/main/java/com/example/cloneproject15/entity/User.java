@@ -3,7 +3,6 @@ package com.example.cloneproject15.entity;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Null;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -46,17 +45,6 @@ public class User extends TimeEntity{
         this.password = password;
         this.username = username;
         this.role = role;
-        this.image_url = image_url;
-        this.category = category;
-    }
-
-    public User(String userid, String password, String username, UserRoleEnum role, Long kakaoid, String email, String image_url, String category) {
-        this.userid = userid;
-        this.password = password;
-        this.username = username;
-        this.role = role;
-        this.kakaoid = kakaoid;
-        this.email = email;
         this.image_url = image_url;
         this.category = category;
     }
