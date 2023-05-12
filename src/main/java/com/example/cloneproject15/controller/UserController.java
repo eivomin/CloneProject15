@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "UserController", description = "유저 관련 Controller")
 public class UserController {
 
     private final UserService userService;
