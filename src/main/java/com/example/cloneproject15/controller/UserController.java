@@ -1,21 +1,44 @@
 package com.example.cloneproject15.controller;
 
-import com.example.cloneproject15.common.ApiResponse;
-import com.example.cloneproject15.entity.User;
+import com.example.cloneproject15.dto.UserRequestDto;
+import com.example.cloneproject15.dto.UserResponseDto;
+import com.example.cloneproject15.security.UserDetailsImpl;
 import com.example.cloneproject15.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/user-info")
 @RequiredArgsConstructor
 public class UserController {
 
-    @GetMapping
-    public ApiResponse getUserInfo(){
-        //User user = new User();
-        return ApiResponse.success("user", "user객체 반환 예정");
+    private final UserService userService;
+
+    @Operation(summary = "유저 가입 API" , description = "새로운 유저 가입")
+    @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "회원 가입 완료" )})
+    @PostMapping("/signup")
+    public UserResponseDto signup(@RequestBody UserRequestDto requestDto){
+        return userService.signup(requestDto);
+    }
+
+    @Operation(summary = "유저 로그인 API" , description = "로그인, RefreshToken, AccessToken")
+    @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "로그인 성공!" )})
+    @PostMapping("/login")
+    public UserResponseDto login(@RequestBody UserRequestDto requestDto, HttpServletResponse response){
+        return userService.login(requestDto, response);
+    }
+
+    @Operation(summary = "유저 로그아웃 API" , description = "로그아웃, RefreshToken, AccessToken")
+    @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "로그아웃 성공!" )})
+    @PostMapping("/logout")
+    public UserResponseDto logout(@AuthenticationPrincipal UserDetailsImpl userDetails, HttpServletRequest request){
+        return userService.logout(userDetails.getUser(), request);
     }
 }
