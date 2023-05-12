@@ -19,13 +19,13 @@ public class AuthController {
                              @RequestBody AuthReqModel authReqModel){
 
         AuthToken accessToken = new AuthToken("token");
-        return ApiResponse.success("token", accessToken.getToken());
+        return ApiResponse.success("token", "tfefefefefefefe");
     }
 
     @GetMapping("/refresh")
     public ApiResponse refreshToken(HttpServletRequest request,
                                     HttpServletResponse response){
         AuthToken newAccessToken = new AuthToken("token");
-        return ApiResponse.success("token", newAccessToken.getToken());
+        return ApiResponse.success("token", "tfefefefefefefe");
     }
 }

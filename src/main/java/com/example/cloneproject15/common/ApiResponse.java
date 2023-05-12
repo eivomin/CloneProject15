@@ -8,14 +8,12 @@ import java.util.Map;
 
 @Getter
 @RequiredArgsConstructor
-public class ApiResponse<T> {
+public class ApiResponse {
 
-    private final ApiResponseHeader header;
-    private final Map<String, T> body;
+    public ApiResponse(String name, String token) {
+    }
 
-    public static <T> ApiResponse<T> success(String name, T body) {
-        Map<String, T> map = new HashMap<>();
-        map.put(name, body);
-        return new ApiResponse(new ApiResponseHeader("success", "성공 메시지"), map);
+    public static ApiResponse success(String name, String token) {
+        return new ApiResponse(name, token);
     }
 }

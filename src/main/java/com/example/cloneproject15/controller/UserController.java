@@ -13,11 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
-
     @GetMapping
     public ApiResponse getUserInfo(){
-        User user = new User();
-        return ApiResponse.success("user", user);
+        //User user = new User();
+        return ApiResponse.success("user", "user객체 반환 예정");
     }
 }
