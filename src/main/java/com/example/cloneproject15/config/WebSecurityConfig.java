@@ -69,7 +69,6 @@ public class WebSecurityConfig {
 
         http.authorizeRequests()
                 // login 없이 허용하는 페이지
-//                .requestMatchers("/api/posts/**").permitAll()
                 .requestMatchers("/**").permitAll()
                 .requestMatchers("/signup").permitAll()
                 .requestMatchers("/login").permitAll()

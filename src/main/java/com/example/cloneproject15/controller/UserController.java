@@ -1,5 +1,6 @@
 package com.example.cloneproject15.controller;
 
+import com.example.cloneproject15.dto.StatusResponseDto;
 import com.example.cloneproject15.dto.UserRequestDto;
 import com.example.cloneproject15.dto.UserResponseDto;
 import com.example.cloneproject15.security.UserDetailsImpl;
@@ -10,10 +11,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,21 +28,30 @@ public class UserController {
     @Operation(summary = "유저 가입 API" , description = "새로운 유저 가입")
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "회원 가입 완료" )})
     @PostMapping("/signup")
-    public UserResponseDto signup(@RequestBody UserRequestDto requestDto){
-        return userService.signup(requestDto);
+    public StatusResponseDto signup(UserRequestDto requestDto,
+                                    @RequestParam(value = "image", required = false) MultipartFile image) throws IOException {
+        return userService.signup(requestDto, image);
     }
 
     @Operation(summary = "유저 로그인 API" , description = "로그인, RefreshToken, AccessToken")
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "로그인 성공!" )})
     @PostMapping("/login")
-    public UserResponseDto login(@RequestBody UserRequestDto requestDto, HttpServletResponse response){
+    public StatusResponseDto login(@RequestBody UserRequestDto requestDto, HttpServletResponse response){
         return userService.login(requestDto, response);
     }
 
     @Operation(summary = "유저 로그아웃 API" , description = "로그아웃, RefreshToken, AccessToken")
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "로그아웃 성공!" )})
     @PostMapping("/logout")
-    public UserResponseDto logout(@AuthenticationPrincipal UserDetailsImpl userDetails, HttpServletRequest request){
+    public StatusResponseDto logout(@AuthenticationPrincipal UserDetailsImpl userDetails, HttpServletRequest request){
         return userService.logout(userDetails.getUser(), request);
+    }
+
+    @Operation(summary = "유저 정보조회 API" , description = "유저정보조회, AccessToken")
+    @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "유저정보 조회 반환 성공!" )})
+    @GetMapping("/user-info")
+    public UserResponseDto getUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails){
+        String userid = userDetails.getUsername();
+        return userService.findUserInfo(userid);
     }
 }
