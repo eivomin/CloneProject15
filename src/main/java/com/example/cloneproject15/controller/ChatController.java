@@ -1,7 +1,11 @@
 package com.example.cloneproject15.controller;
 
 
+import com.example.cloneproject15.dto.ChatMessage;
+import com.example.cloneproject15.dto.ChatRoom;
+import com.example.cloneproject15.dto.RoomDto;
 import com.example.cloneproject15.entity.Message;
+import com.example.cloneproject15.service.ChatService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -11,41 +15,50 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@Tag(name = "ChatController", description = "채팅 Controller")
-//@RequestMapping("/chat")
 public class ChatController {
-//    private final ChatService chatService;
-//
-//    @PostMapping
-//    public ChatRoom createRoom(@RequestBody String name) {
-//        return chatService.createRoom(name);
-//    }
-//
-//    @GetMapping
-//    public List<ChatRoom> findAllRoom() {
-//        return chatService.findAllRoom();
-//    }
-    private final SimpMessagingTemplate simpMessagingTemplate;
+    private final ChatService chatService;
 
-    @Operation(summary = "메시지송신 API" , description = "받는 메시지")
-    @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "회원 가입 완료" )})
-    @MessageMapping("/message")
-    @SendTo("/chatroom/public")
-    public Message receiveMessage(@Payload Message message){
-        return message;
+    @PostMapping("/chat")
+    public ChatRoom createRoom(@RequestParam String name) {
+        return chatService.createRoom(name);
     }
 
-    @Operation(summary = "rec 메시지 API" , description = "새로운 유저 가입")
-    @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "회원 가입 완료" )})
-    @MessageMapping("/private-message")
-    public Message recMessage(@Payload Message message){
-        simpMessagingTemplate.convertAndSendToUser(message.getReceiverName(),"/private",message);
-        System.out.println(message.toString());
-        return message;
+    @GetMapping("/ex03")
+    public List<RoomDto> getRooms() {
+        List<RoomDto> rooms = chatService.getRooms();
+        return rooms;
+    }
+
+    /* 게시글 전체 조회 + 검색 페이징 api */
+    @GetMapping("/move/{room_id}")
+    public ModelAndView moveList(@PathVariable String room_id){
+        ModelAndView view = new ModelAndView();
+        view.setViewName("detail");
+        view.addObject("roomId", room_id);
+        return view;
+    }
+
+    //방입장 API
+    @MessageMapping("/chat/register")
+    @SendTo("/topic/public")
+    public ChatMessage register(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor) {
+        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
+        return chatMessage;
+    }
+
+    //메시지 전송 API
+    @MessageMapping("/chat/send")
+    @SendTo("/topic/public")
+    public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
+        return chatMessage;
     }
 }

@@ -48,4 +48,21 @@ public class User extends TimeEntity{
         this.image_url = image_url;
         this.category = category;
     }
+
+    public User(String userid, String password, String username, UserRoleEnum role, Long kakaoid, String email, String image_url, String category) {
+        this.userid = userid;
+        this.password = password;
+        this.username = username;
+        this.role = role;
+        this.kakaoid = kakaoid;
+        this.email = email;
+        this.image_url = image_url;
+        this.category = category;
+    }
+
+    public User kakaoIdUpdate(Long kakaoid) {
+        this.kakaoid = kakaoid;
+        return this;
+    }
+
 }

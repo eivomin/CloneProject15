@@ -71,22 +71,23 @@ public class UserService {
 
         String image_url = null;
 
-        //새로 부여한 이미지 명
-        String newFileName = "image"+hour+minute+second+millis;
-        String fileExtension = '.'+image.getOriginalFilename().replaceAll("^.*\\.(.*)$", "$1");
-        String imageName = S3_BUCKET_PREFIX + newFileName + fileExtension;
+        if(image != null){
+            //새로 부여한 이미지 명
+            String newFileName = "image"+hour+minute+second+millis;
+            String fileExtension = '.'+image.getOriginalFilename().replaceAll("^.*\\.(.*)$", "$1");
+            String imageName = S3_BUCKET_PREFIX + newFileName + fileExtension;
 
-        //메타데이터 설정
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentType(image.getContentType());
-        objectMetadata.setContentLength(image.getSize());
+            //메타데이터 설정
+            ObjectMetadata objectMetadata = new ObjectMetadata();
+            objectMetadata.setContentType(image.getContentType());
+            objectMetadata.setContentLength(image.getSize());
 
-        InputStream inputStream = image.getInputStream();
+            InputStream inputStream = image.getInputStream();
 
-        amazonS3.putObject(new PutObjectRequest(bucketName, imageName, inputStream, objectMetadata)
-                .withCannedAcl(CannedAccessControlList.PublicRead));
-        image_url = amazonS3.getUrl(bucketName, imageName).toString();
-
+            amazonS3.putObject(new PutObjectRequest(bucketName, imageName, inputStream, objectMetadata)
+                    .withCannedAcl(CannedAccessControlList.PublicRead));
+            image_url = amazonS3.getUrl(bucketName, imageName).toString();
+        }
 
         //관리자 권한 체크
         UserRoleEnum role = UserRoleEnum.USER;

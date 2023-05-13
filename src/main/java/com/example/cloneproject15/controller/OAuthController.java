@@ -1,23 +1,32 @@
 package com.example.cloneproject15.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import com.example.cloneproject15.jwt.JwtUtil;
+import com.example.cloneproject15.service.KakaoService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 @RestController
 @AllArgsConstructor
-@Tag(name = "OAuthController", description = "OAuth Controller")
 public class OAuthController {
 
-    @Operation(summary = "카카오callback API" , description = "카카오 callback")
-    @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "회원 가입 완료" )})
+    private final KakaoService kakaoService;
+
+    @GetMapping("/board")
+    public ModelAndView board() {
+        return new ModelAndView("index");
+    }
+
     @GetMapping("/oauth/kakao")
-    public void kakaoCallback(@RequestParam String code){
-        System.out.println(code);
+    public String kakaoLogin(@RequestParam String code, HttpServletResponse response) throws JsonProcessingException {
+        // code: 카카오 서버로부터 받은 인가 코드
+        System.out.println("컨트롤러 진입");
+        return kakaoService.kakaoLogin(code, response);
+
     }
 }

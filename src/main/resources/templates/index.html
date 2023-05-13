@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <title>채팅방</title>
+</head>
+<script>
+    $(document).ready(function () {
+
+    //댓글 부분
+    fetch(`/ex03`)
+        .then((res) => res.json())
+        .then((data) => {
+            console.log(data)
+            data.forEach((a) => {
+                let id = a['id'];
+                let room_id = a['roomId'];
+                let name = a['name'];
+
+                let temp_html = `<div class="reply-data" id="reply${id}">
+                                      <input id="replyName${id}" value="${id}" style="font-weight: bolder;" readonly/>
+                                      <input id="replyComment${id}" value="${room_id}" onclick="move('${room_id}');" readonly/>
+                                      <input id="replyComment${id}" value="${name}" readonly />
+                                 </div>`;
+                $('#replyBox').append(temp_html);
+            });
+        });
+    });
+
+    function createChat(){
+        const subject = $('#subject').val();
+
+        $.ajax({
+            type: 'POST',
+            url: `/chat?name=`+subject,
+            success: function (response) {
+                alert('게시글 등록 성공!');
+                window.location.href = "http://localhost:8080/";
+            },
+            error(error, status, request) {
+                console.error(error);
+                alert('게시글 등록 실패!');
+                window.location.href = host + "/api/user/login-page";
+            }
+        });
+    }
+
+    function move(room_id){
+        window.location.href=`/move/`+room_id;
+    }
+</script>
+<style>
+    .layout{
+        width: 500px;
+        margin: 0 auto;
+        margin-top: 40px;
+    }
+</style>
+<body>
+<div class="layout">
+    <table>
+        <thead>
+        </thead>
+        <tbody>
+        <input type="text" id="subject">
+        <button onclick="javacript:createChat();">방 개설</button>
+        <div id="replyBox">
+        </div>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
