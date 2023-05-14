@@ -30,17 +30,24 @@ public class ChatRoom {
     @Column(name = "host")
     private String host;
 
-    @Column(name = "guest")
-    private String guest;
+//    @Column(name = "guest")
+//    private String guest;
 
-    public static ChatRoom of(String host, String guest) {
-        return ChatRoom.builder()
-                .roomId(UUID.randomUUID().toString())
-                .roomName(host + "님과의 대화 ο(=•ω＜=)ρ⌒☆")
-                .host(host)
-                .guest(guest)
-                .build();
+//    public static ChatRoom of(String host, String guest) {
+//        return ChatRoom.builder()
+//                .roomId(UUID.randomUUID().toString())
+//                .roomName(host + "님과의 대화 ο(=•ω＜=)ρ⌒☆")
+//                .host(host)
+//                .guest(guest)
+//                .build();
+//    }
+
+    public ChatRoom(String roomName, String host) {
+        this.roomId = UUID.randomUUID().toString();
+        this.roomName = roomName;
+        this.host = host;
     }
+
     //private String lastChat;
 
 /*    public static ChatRoom of(Member host, Member guest) {
