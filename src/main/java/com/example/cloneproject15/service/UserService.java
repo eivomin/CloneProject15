@@ -20,6 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,8 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -148,6 +148,19 @@ public class UserService {
         throw new IllegalStateException("로그아웃 실패");
     }
 
+
+    //친구 목록 조회
+    @Transactional(readOnly = true)
+    public List<UserResponseDto> getUsers(String userid) {
+        Optional<User> findUser = userRepository.findByUserid(userid);
+        if(findUser.isPresent()) {
+            List<User> userList = userRepository.findAllByOrderByUsernameDesc();
+            return userList.stream().map(UserResponseDto::new).collect(Collectors.toList());
+        }
+        throw new IllegalStateException("권한이 없습니다");
+    }
+
+    //특정 친구 조회
     @Transactional(readOnly = true)
     public UserResponseDto findUserInfo(String userid){
         Optional<User> findUser = userRepository.findByUserid(userid);
@@ -158,9 +171,9 @@ public class UserService {
         throw new IllegalStateException("유저 정보 조회 반환 실패");
     }
 
-    @Transactional(readOnly = true)
-    public List<UserResponseDto> getUsers() {
-        List<User> userList = userRepository.findAllByOrderByUsernameDesc();
-        return userList.stream().map(UserResponseDto::new).collect(Collectors.toList());
-    }
+
+
+
+
+
 }

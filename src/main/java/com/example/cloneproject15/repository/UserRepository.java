@@ -14,5 +14,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByKakaoid(Long id);
     Optional<User> findByEmail(String email);
     List<User> findAllByOrderByUsernameDesc();
+
+    List<User> findAllByOrderByModifiedDateDesc();
 }
 

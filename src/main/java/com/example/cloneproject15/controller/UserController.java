@@ -12,12 +12,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -48,25 +50,24 @@ public class UserController {
         return userService.logout(userDetails.getUser(), request);
     }
 
-    @Operation(summary = "유저 정보조회 API" , description = "유저정보조회, AccessToken")
-    @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "유저정보 조회 반환 성공!" )})
-    @GetMapping("/user-info")
-    public UserResponseDto getUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails){
-        String userid = userDetails.getUsername();
-        return userService.findUserInfo(userid);
-    }
-
-    @Operation(summary = "유저 목록 API" , description = "유저목록조회")
+    //친구 목록 조회
+    @Operation(summary = "유저 목록 API" , description = "유저목록조회, AccessToken")
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "유저목록 조회 반환 성공!" )})
-    @GetMapping("/users")
+    @GetMapping("/user-info")
     public List<UserResponseDto> getUsers(@AuthenticationPrincipal UserDetailsImpl userDetails){
-        return userService.getUsers();
+        String userid = userDetails.getUsername();
+        return userService.getUsers(userid);
     }
 
+    // 특정 친구 조회
     @Operation(summary = "특정 유저 정보조회 API" , description = "유저정보조회, AccessToken")
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "유저정보 조회 반환 성공!" )})
     @GetMapping("/user-info/{userId}")
-    public UserResponseDto getUserInfo2(@PathVariable String userId, @AuthenticationPrincipal UserDetailsImpl userDetails){
+    public UserResponseDto getUserInfo(@PathVariable String userId, @AuthenticationPrincipal UserDetailsImpl userDetails){
         return userService.findUserInfo(userId);
     }
+
+
+
+
 }
