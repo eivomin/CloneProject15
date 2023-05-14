@@ -20,6 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -171,9 +172,17 @@ public class UserService {
         throw new IllegalStateException("유저 정보 조회 반환 실패");
     }
 
+    // 마이페이지 조회
+    @Transactional(readOnly = true)
+    public ResponseEntity<UserResponseDto> myPage(User user) {
+        return ResponseEntity.status(HttpStatus.OK).body(new UserResponseDto(user));
+    }
 
-
-
-
+    // 마이페이지 수정
+    @Transactional
+    public ResponseEntity<UserResponseDto> updateMypage(UserRequestDto userRequestDto, User user) {
+        user.update(userRequestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(new UserResponseDto(user));
+    }
 
 }

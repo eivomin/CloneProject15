@@ -68,6 +68,23 @@ public class UserController {
     }
 
 
+    // 마이페이지 조회
+    @Operation(summary = "마이페이지 API" , description = "마이페이지 조회, AccessToken")
+    @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "마이페이지 반환 성공!" )})
+    @GetMapping("/mypage")
+    public ResponseEntity<UserResponseDto> myPage(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return userService.myPage(userDetails.getUser());
+    }
+
+    // 마이페이지 수정
+    @Operation(summary = "마이페이지 수정 API" , description = "마이페이지 수정, AccessToken")
+    @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "마이페이지 수정 성공!" )})
+    @PutMapping("/mypage")
+    public ResponseEntity<UserResponseDto> updateMypage(@RequestBody UserRequestDto userRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return userService.updateMypage(userRequestDto, userDetails.getUser());
+    }
+
+
 
 
 }

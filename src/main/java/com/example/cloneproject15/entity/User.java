@@ -1,5 +1,6 @@
 package com.example.cloneproject15.entity;
 
+import com.example.cloneproject15.dto.UserRequestDto;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Null;
@@ -58,6 +59,14 @@ public class User extends TimeEntity{
         this.email = email;
         this.image_url = image_url;
         this.birthday = birthday;
+    }
+
+    public void update(UserRequestDto userRequestDto){
+        this.password = userRequestDto.getPassword();
+        this.username = userRequestDto.getUsername();
+//        this.email = userRequestDto.getEmail();
+//        this.image_url = userRequestDto.getImage_url();
+        this.birthday = userRequestDto.getBirthday();
     }
 
     public User kakaoIdUpdate(Long kakaoid) {
