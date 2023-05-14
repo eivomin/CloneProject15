@@ -1,81 +1,77 @@
 package com.example.cloneproject15.service;
 
-import com.example.cloneproject15.dto.ChatRoom;
-import com.example.cloneproject15.dto.RoomDto;
-import com.example.cloneproject15.entity.Room;
+import com.example.cloneproject15.dto.ChatDto;
+import com.example.cloneproject15.dto.ResponseDto;
+import com.example.cloneproject15.entity.ChatRoom;
 import com.example.cloneproject15.entity.User;
 import com.example.cloneproject15.repository.ChatRoomRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Slf4j
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class ChatService {
-    private final ObjectMapper objectMapper;
-    private Map<String, ChatRoom> chatRooms;
-    private final ChatRoomRepository chatRoomRespository;
 
-    @PostConstruct
-    private void init() {
-        chatRooms = new LinkedHashMap<>();
+    private final ChatRoomRepository chatRoomRepository;
+
+    public ResponseDto createChatRoom(String receiver, String sender) {
+        //이미 reciever와 sender로 생성된 채팅방이 있는지 확인
+        Optional<ChatRoom> findChatRoom = validExistChatRoom(receiver, sender);
+        //있으면 ChatRoom의 roomId 반환
+        if(findChatRoom.isPresent())
+            return ResponseDto.setSuccess("already has room and find Chatting Room Success!", findChatRoom.get().getRoomId());
+
+        //없으면 receiver와 sender의 방을 생성해주고 roomId 반환
+        ChatRoom newChatRoom = ChatRoom.of(receiver, sender);
+        chatRoomRepository.save(newChatRoom);
+        return ResponseDto.setSuccess("create ChatRoom success", newChatRoom.getRoomId());
     }
 
-    @Transactional(readOnly = true)
-    public List<ChatRoom> findAllRoom() {
-        return new ArrayList<>(chatRooms.values());
+    public ChatDto enterChatRoom(ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) {
+        // 채팅방 찾기
+        ChatRoom chatRoom = validExistChatRoom(chatDto.getRoomId());
+        // 예외처리
+        //반환 결과를 socket session에 사용자의 id로 저장
+        headerAccessor.getSessionAttributes().put("nickname", chatDto.getSender());
+        headerAccessor.getSessionAttributes().put("roomId", chatDto.getRoomId());
+
+        chatDto.setMessage(chatDto.getSender() + "님 입장!! ο(=•ω＜=)ρ⌒☆");
+        return chatDto;
     }
 
-    @Transactional(readOnly = true)
-    // 게시글 전체 조회
-    public List<RoomDto> getRooms(){
-        List<Room> roomList = chatRoomRespository.findAll();
-        return roomList.stream().map(RoomDto::new).collect(Collectors.toList());
-    }
+    public ChatDto disconnectChatRoom(SimpMessageHeaderAccessor headerAccessor) {
+        String roomId = (String) headerAccessor.getSessionAttributes().get("roomId");
+        String nickName = (String) headerAccessor.getSessionAttributes().get("nickname");
 
+//        chatRoomRepository.deleteByRoomId(roomId);
 
-    @Transactional(readOnly = true)
-    public ChatRoom findRoomById(String roomId) {
-        return chatRooms.get(roomId);
-    }
-
-    public ChatRoom createRoom(String name) {
-        String randomId = UUID.randomUUID().toString();
-        ChatRoom chatRoom = ChatRoom.builder()
-                .roomId(randomId)
-                .name(name)
+        ChatDto chatDto = ChatDto.builder()
+                .type(ChatDto.MessageType.LEAVE)
+                .roomId(roomId)
+                .sender(nickName)
+                .message(nickName + "님 퇴장!! ヽ(*。>Д<)o゜")
                 .build();
-        chatRooms.put(randomId, chatRoom);
-        User user = new User();
-        chatRoomRespository.save(new Room(randomId, name));
 
-        return chatRoom;
+        return chatDto;
     }
 
-//    public ChatRoom createRoom(String name, User user) {
-//        String randomId = UUID.randomUUID().toString();
-//        ChatRoom chatRoom = ChatRoom.builder()
-//                .roomId(randomId)
-//                .name(name)
-//                .username(user.getUsername())
-//                .build();
-//        chatRooms.put(randomId, chatRoom);
-//
-//        chatRoomRespository.save(new Room(randomId, name, user));
-//
-//        return chatRoom;
-//    }
+    public Optional<ChatRoom> validExistChatRoom(String host, String guest) {
+        return chatRoomRepository.findByHostAndGuest(host, guest);
+    }
 
-
+    public ChatRoom validExistChatRoom(String roomId) {
+        return chatRoomRepository.findByRoomId(roomId).orElseThrow(
+                ()-> new NoSuchElementException("채팅방이 존재하지 않습니다.")
+        );
+    }
 }

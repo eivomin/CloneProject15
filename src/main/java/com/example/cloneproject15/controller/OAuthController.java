@@ -1,9 +1,7 @@
 package com.example.cloneproject15.controller;
 
-import com.example.cloneproject15.jwt.JwtUtil;
 import com.example.cloneproject15.service.KakaoService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -29,7 +29,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -53,7 +55,7 @@ public class UserService {
         String userid = requestDto.getUserid();
         String username = requestDto.getUsername();
         String password = passwordEncoder.encode(requestDto.getPassword());
-        String category = requestDto.getCategory();
+        String birthday = requestDto.getBirthday();
 
         //중복된 아이디 값 체크
         Optional<User> findUser = userRepository.findByUserid(userid);
@@ -93,7 +95,7 @@ public class UserService {
         UserRoleEnum role = UserRoleEnum.USER;
 
         userRepository.save(new User(requestDto.getUserid(), password, requestDto.getUsername(),
-                role, image_url, requestDto.getCategory()));
+                role, image_url, requestDto.getBirthday()));
         return new StatusResponseDto("회원가입 성공");
     }
 
@@ -154,5 +156,11 @@ public class UserService {
             return new UserResponseDto(findUser.get());
         }
         throw new IllegalStateException("유저 정보 조회 반환 실패");
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserResponseDto> getUsers() {
+        List<User> userList = userRepository.findAllByOrderByUsernameDesc();
+        return userList.stream().map(UserResponseDto::new).collect(Collectors.toList());
     }
 }

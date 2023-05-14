@@ -9,20 +9,20 @@ import lombok.NoArgsConstructor;
 public class UserResponseDto {
     private String userid;
     private String username;
-    private String category;
+    private String birthday;
     private String image_url;
 
-    public UserResponseDto(String userid, String username, String category, String image_url) {
+    public UserResponseDto(String userid, String username, String birthday, String image_url) {
         this.userid = userid;
         this.username = username;
-        this.category = category;
+        this.birthday = birthday;
         this.image_url = image_url;
     }
 
     public UserResponseDto(User user){
         this.userid = user.getUserid();
         this.username = user.getUsername();
-        this.category = user.getCategory();
+        this.birthday = user.getBirthday();
         this.image_url = user.getImage_url();
     }
 }

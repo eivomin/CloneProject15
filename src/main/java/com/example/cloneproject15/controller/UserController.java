@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -53,5 +54,19 @@ public class UserController {
     public UserResponseDto getUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails){
         String userid = userDetails.getUsername();
         return userService.findUserInfo(userid);
+    }
+
+    @Operation(summary = "유저 목록 API" , description = "유저목록조회")
+    @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "유저목록 조회 반환 성공!" )})
+    @GetMapping("/users")
+    public List<UserResponseDto> getUsers(@AuthenticationPrincipal UserDetailsImpl userDetails){
+        return userService.getUsers();
+    }
+
+    @Operation(summary = "특정 유저 정보조회 API" , description = "유저정보조회, AccessToken")
+    @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "유저정보 조회 반환 성공!" )})
+    @GetMapping("/user-info/{userId}")
+    public UserResponseDto getUserInfo2(@PathVariable String userId, @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return userService.findUserInfo(userId);
     }
 }

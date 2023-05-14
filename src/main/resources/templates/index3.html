@@ -1,0 +1,33 @@
+<div class="sign-in-black-bg">
+    <div class="sign-in-bg">
+        <h1 style="font-family:'PyeongChangPeace-Bold'; text-align: center;">로그인</h1>
+        <div class="sign-in-box">
+            <button id="login-kakao-btn" onclick="location.href='https://kauth.kakao.com/oauth/authorize?client_id=028ee58b17a56cabc49dd857ac4eef57&redirect_uri=http://localhost:8080/oauth/kakao&response_type=code'">
+                카카오로 로그인하기
+            </button>
+            <button id="login-google-btn" onclick="location.href='/oauth2/authorization/google'">
+                구글로 로그인하기
+            </button>
+            <div class="sign-in-inside">
+                <p>아이디</p>
+                <form>
+                    <input type="text" placeholder="ID" id="sign-in-id-Box" />
+                </form>
+            </div>
+            <div class="sign-in-inside">
+                <p>비밀번호</p>
+                <form>
+                    <input type="password" placeholder="PW" id="sign-in-pw-Box" />
+                </form>
+            </div>
+        </div>
+        <div style="text-align: center">
+            <button type="submit" class="sign-in-btn send-btn" id="sign-in-send" onclick="login()">
+                로그인
+            </button>
+            <button type="button" class="sign-in-x-btn close-btn" id="in-close">
+                닫기
+            </button>
+        </div>
+    </div>
+</div>

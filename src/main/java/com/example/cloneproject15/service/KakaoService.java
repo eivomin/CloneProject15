@@ -162,7 +162,7 @@ public class KakaoService {
                 // email: kakao email
                 String email = kakaoUserInfo.getEmail();
 
-                //User(String userid, String password, String username, UserRoleEnum role, Long kakaoid, String email, String image_url, String category)
+                //User(String userid, String password, String username, UserRoleEnum role, Long kakaoid, String email, String image_url, String birthday)
                 kakaoUser = new User("kakao", encodedPassword, kakaoUserInfo.getNickname(), UserRoleEnum.USER, kakaoId, email, "kakao", "kakao");
             }
 

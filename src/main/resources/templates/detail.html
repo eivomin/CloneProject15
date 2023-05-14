@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
     <title>Chat Tupi | Spring Boot + WebSocket</title>
     <link rel="stylesheet" href="/css/main.css" />
 </head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <body background="maxresdefault.jpg"
       style="background-position: center; background-repeat: no-repeat; background-size: cover;">
 <noscript>
@@ -41,6 +42,7 @@
                 <div class="input-group clearfix">
                     <input type="text" id="message" placeholder="Digite uma mensagem..."
                            autocomplete="off" class="form-control" />
+                    <input type="hidden" id="roomId" th:value="${roomId}">
                     <button type="submit" class="primary">Enviar</button>
                 </div>
             </div>

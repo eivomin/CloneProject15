@@ -34,22 +34,22 @@ public class User extends TimeEntity{
     @Column(nullable = true)
     private String email;
 
-    @Column
+    @Column(nullable = true)
     private String image_url;
 
-    @Column
-    private String category;
+    @Column(nullable = false)
+    private String birthday;
 
-    public User(String userid, String password, String username, UserRoleEnum role, String image_url, String category) {
+    public User(String userid, String password, String username, UserRoleEnum role, String image_url, String birthday) {
         this.userid = userid;
         this.password = password;
         this.username = username;
         this.role = role;
         this.image_url = image_url;
-        this.category = category;
+        this.birthday = birthday;
     }
 
-    public User(String userid, String password, String username, UserRoleEnum role, Long kakaoid, String email, String image_url, String category) {
+    public User(String userid, String password, String username, UserRoleEnum role, Long kakaoid, String email, String image_url, String birthday) {
         this.userid = userid;
         this.password = password;
         this.username = username;
@@ -57,7 +57,7 @@ public class User extends TimeEntity{
         this.kakaoid = kakaoid;
         this.email = email;
         this.image_url = image_url;
-        this.category = category;
+        this.birthday = birthday;
     }
 
     public User kakaoIdUpdate(Long kakaoid) {

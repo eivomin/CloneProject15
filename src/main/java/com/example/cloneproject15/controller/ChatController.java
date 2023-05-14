@@ -1,64 +1,55 @@
 package com.example.cloneproject15.controller;
 
 
-import com.example.cloneproject15.dto.ChatMessage;
-import com.example.cloneproject15.dto.ChatRoom;
-import com.example.cloneproject15.dto.RoomDto;
-import com.example.cloneproject15.entity.Message;
+import com.example.cloneproject15.dto.ChatDto;
+import com.example.cloneproject15.dto.ResponseDto;
 import com.example.cloneproject15.service.ChatService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
-import java.util.List;
-
-@RequiredArgsConstructor
 @RestController
+@Slf4j
+@RequiredArgsConstructor
 public class ChatController {
+
     private final ChatService chatService;
+    private final SimpMessagingTemplate msgOperation;
 
     @PostMapping("/chat")
-    public ChatRoom createRoom(@RequestParam String name) {
-        return chatService.createRoom(name);
+    public ResponseDto createChatRoom(@RequestBody String receiver, String sender) {
+        // @Param sender should be replaced to UserDetails.getMember();
+        return chatService.createChatRoom(receiver, sender);
+        // createChatRoom의 결과인 roomId와 type : ENTER을 저장한 chatDto에 넣어줘야함
     }
 
-    @GetMapping("/ex03")
-    public List<RoomDto> getRooms() {
-        List<RoomDto> rooms = chatService.getRooms();
-        return rooms;
+    @MessageMapping("/chat/enter")
+    @SendTo("/sub/chat/room")
+    public void enterChatRoom(ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
+        Thread.sleep(500); // simulated delay
+        ChatDto newchatdto = chatService.enterChatRoom(chatDto, headerAccessor);
+        msgOperation.convertAndSend("/sub/chat/room" + chatDto.getRoomId(), newchatdto);
     }
 
-    /* 게시글 전체 조회 + 검색 페이징 api */
-    @GetMapping("/move/{room_id}")
-    public ModelAndView moveList(@PathVariable String room_id){
-        ModelAndView view = new ModelAndView();
-        view.setViewName("detail");
-        view.addObject("roomId", room_id);
-        return view;
-    }
-
-    //방입장 API
-    @MessageMapping("/chat/register")
-    @SendTo("/topic/public")
-    public ChatMessage register(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor) {
-        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
-        return chatMessage;
-    }
-
-    //메시지 전송 API
     @MessageMapping("/chat/send")
-    @SendTo("/topic/public")
-    public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
-        return chatMessage;
+    @SendTo("/sub/chat/room")
+    public void sendChatRoom(ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
+        Thread.sleep(500); // simulated delay
+        msgOperation.convertAndSend("/sub/chat/room" + chatDto.getRoomId(), chatDto);
+    }
+
+    @EventListener
+    public void webSocketDisconnectListener(SessionDisconnectEvent event) {
+        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+        ChatDto chatDto = chatService.disconnectChatRoom(headerAccessor);
+        msgOperation.convertAndSend("/sub/chat/room" + chatDto.getRoomId(), chatDto);
     }
 }
