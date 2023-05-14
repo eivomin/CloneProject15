@@ -22,4 +22,6 @@ public class ChatDto {
     private String sender;
     private String roomId;
     private String message;
+
+
 }

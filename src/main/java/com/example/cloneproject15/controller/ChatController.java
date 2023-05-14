@@ -4,6 +4,7 @@ package com.example.cloneproject15.controller;
 import com.example.cloneproject15.dto.ChatDto;
 import com.example.cloneproject15.dto.ChatRoomDto;
 import com.example.cloneproject15.dto.ResponseDto;
+import com.example.cloneproject15.security.UserDetailsImpl;
 import com.example.cloneproject15.service.ChatService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -18,6 +19,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
@@ -35,16 +37,18 @@ public class ChatController {
     @Operation(summary = "채팅방 생성 API" , description = "새로운 채팅방 생성")
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "채팅방 생성 완료" )})
     @PostMapping("/chat")
-    public ResponseDto createChatRoom(@RequestBody ChatRoomDto chatRoomDto) {
+    public ResponseDto createChatRoom(@RequestBody ChatRoomDto chatRoomDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         // @Param sender should be replaced to UserDetails.getMember();
+        chatRoomDto.setHost(userDetails.getUsername());
         return chatService.createChatRoom(chatRoomDto.getRoomName(), chatRoomDto.getHost());
         // createChatRoom의 결과인 roomId와 type : ENTER을 저장한 chatDto에 넣어줘야함
     }
 
     @MessageMapping("/chat/enter")
     @SendTo("/sub/chat/room")
-    public void enterChatRoom(ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
+    public void enterChatRoom(ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor, @AuthenticationPrincipal UserDetailsImpl userDetails) throws Exception {
         Thread.sleep(500); // simulated delay
+        //chatDto.setSender(userDetails.getUsername());
         ChatDto newchatdto = chatService.enterChatRoom(chatDto, headerAccessor);
         msgOperation.convertAndSend("/sub/chat/room" + chatDto.getRoomId(), newchatdto);
     }
