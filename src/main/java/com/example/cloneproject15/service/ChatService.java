@@ -1,6 +1,7 @@
 package com.example.cloneproject15.service;
 
 import com.example.cloneproject15.dto.ChatDto;
+import com.example.cloneproject15.dto.ChatRoomDto;
 import com.example.cloneproject15.dto.ResponseDto;
 import com.example.cloneproject15.entity.ChatRoom;
 import com.example.cloneproject15.entity.User;
@@ -24,15 +25,17 @@ public class ChatService {
 
     private final ChatRoomRepository chatRoomRepository;
 
-    public ResponseDto createChatRoom(String receiver, String sender) {
+    public ResponseDto createChatRoom(String roomName, String host) {
         //이미 reciever와 sender로 생성된 채팅방이 있는지 확인
-        Optional<ChatRoom> findChatRoom = validExistChatRoom(receiver, sender);
+        Optional<ChatRoom> findChatRoom = validExistChatRoom(host, roomName);
         //있으면 ChatRoom의 roomId 반환
         if(findChatRoom.isPresent())
             return ResponseDto.setSuccess("already has room and find Chatting Room Success!", findChatRoom.get().getRoomId());
 
         //없으면 receiver와 sender의 방을 생성해주고 roomId 반환
-        ChatRoom newChatRoom = ChatRoom.of(receiver, sender);
+        //ChatRoom newChatRoom = ChatRoom.of(receiver, sender);
+        //String roomId, String roomName, String host, String guest
+        ChatRoom newChatRoom = new ChatRoom(roomName, host);
         chatRoomRepository.save(newChatRoom);
         return ResponseDto.setSuccess("create ChatRoom success", newChatRoom.getRoomId());
     }
@@ -65,13 +68,24 @@ public class ChatService {
         return chatDto;
     }
 
-    public Optional<ChatRoom> validExistChatRoom(String host, String guest) {
-        return chatRoomRepository.findByHostAndGuest(host, guest);
+    public Optional<ChatRoom> validExistChatRoom(String host, String roomName) {
+        //return chatRoomRepository.findByHostAndGuest(host, guest);
+        return chatRoomRepository.findByHostAndRoomName(host, roomName);
     }
 
     public ChatRoom validExistChatRoom(String roomId) {
         return chatRoomRepository.findByRoomId(roomId).orElseThrow(
                 ()-> new NoSuchElementException("채팅방이 존재하지 않습니다.")
         );
+    }
+
+    public List<ChatRoomDto> showRoomList() {
+        List<ChatRoom>chatRoomList = chatRoomRepository.findAll();
+        List<ChatRoomDto> chatRoomDtoList = new ArrayList<>();
+        for (ChatRoom chatRoom : chatRoomList) {
+            ChatRoomDto chatRoomDto = new ChatRoomDto(chatRoom);
+            chatRoomDtoList.add(chatRoomDto);
+        }
+        return chatRoomDtoList;
     }
 }
