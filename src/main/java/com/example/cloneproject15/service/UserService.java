@@ -191,9 +191,13 @@ public class UserService {
         String username = userRequestDto.getUsername();
         String birthday = userRequestDto.getBirthday();
 
-//        if(!userRequestDto.getPassword().matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$")){ // 비밀번호 정규식 체크
-//            throw new ApiException(ExceptionEnum.PASSWAORD_REGEX);
-//        }
+        User findUser = userRepository.findById(user.getId()).orElseThrow(
+                () -> new ApiException(ExceptionEnum.NOT_FOUND_USER)
+        );
+
+        if(!userRequestDto.getPassword().matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$")){ // 비밀번호 정규식 체크
+            throw new ApiException(ExceptionEnum.PASSWAORD_REGEX);
+        }
 
         String password = passwordEncoder.encode(userRequestDto.getPassword());
 
@@ -225,6 +229,7 @@ public class UserService {
             image_url = amazonS3.getUrl(bucketName, imageName).toString();
         }
 
+        findUser.update(userRequestDto, image_url);
 //        user.update(userRequestDto);
         return ResponseEntity.status(HttpStatus.OK).body(new UserResponseDto(user));
     }
