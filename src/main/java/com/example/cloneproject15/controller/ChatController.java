@@ -5,7 +5,11 @@ import com.example.cloneproject15.dto.ChatDto;
 import com.example.cloneproject15.dto.ChatRoomDto;
 import com.example.cloneproject15.dto.ResponseDto;
 import com.example.cloneproject15.entity.Chat;
+import com.example.cloneproject15.entity.ChatRoom;
+import com.example.cloneproject15.entity.User;
 import com.example.cloneproject15.repository.ChatRepository;
+import com.example.cloneproject15.repository.ChatRoomRepository;
+import com.example.cloneproject15.repository.UserRepository;
 import com.example.cloneproject15.security.UserDetailsImpl;
 import com.example.cloneproject15.service.ChatService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,8 +41,9 @@ public class ChatController {
 
     private final ChatService chatService;
     private final SimpMessagingTemplate msgOperation;
-
     private final ChatRepository chatRepository;
+    private final ChatRoomRepository chatRoomRepository;
+    private final UserRepository userRepository;
 
     @Operation(summary = "채팅방 생성 API" , description = "새로운 채팅방 생성")
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "채팅방 생성 완료" )})
@@ -56,8 +61,8 @@ public class ChatController {
     public void enterChatRoom(ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
         Thread.sleep(500); // simulated delay
         //webSocketAuthInterceptor.beforeHandshake()
-        String username = (String) headerAccessor.getSessionAttributes().get("username");
-        chatDto.setSender(username);
+        //String username = (String) headerAccessor.getSessionAttributes().get("username");
+        //chatDto.setSender(username);
         ChatDto newchatdto = chatService.enterChatRoom(chatDto, headerAccessor);
         msgOperation.convertAndSend("/sub/chat/room" + chatDto.getRoomId(), newchatdto);
     }
@@ -66,8 +71,16 @@ public class ChatController {
     @SendTo("/sub/chat/room")
     public void sendChatRoom(ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
         Thread.sleep(500); // simulated delay
+        ChatRoom room = chatRoomRepository.findByRoomId(chatDto.getRoomId()).orElseThrow(
+                () -> new IllegalArgumentException("존재하지 않는 채팅방입니다.")
+        );
+        User user = userRepository.findByUsername(chatDto.getSender()).orElseThrow(
+                () -> new IllegalArgumentException("존재하지 않는 유저입니다.")
+        );
         msgOperation.convertAndSend("/sub/chat/room" + chatDto.getRoomId(), chatDto);
         Chat chat = new Chat(chatDto);
+        chat.setRoom(room);
+        chat.setUser(user);
         chatRepository.save(chat);
     }
 

@@ -38,5 +38,6 @@ public class Chat extends TimeEntity {
     public Chat (ChatDto chatDto) {
         this.sender = chatDto.getSender();
         this.message = chatDto.getMessage();
+        //this.room = chatDto.getRoomId();
     }
 }
