@@ -19,6 +19,5 @@ public class ChatRoomDto {
         this.roomId = chatRoom.getRoomId();
         this.roomName = chatRoom.getRoomName();
         this.host = chatRoom.getHost();
-
     }
 }
