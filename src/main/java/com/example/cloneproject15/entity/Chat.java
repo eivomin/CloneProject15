@@ -26,6 +26,7 @@ public class Chat extends TimeEntity {
     private String message;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
 
 /*    public static Chat of(ChatRequestDto dto, ChatRoom room, Member member){

@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.example.cloneproject15.config.SentrySupport;
 import com.example.cloneproject15.dto.StatusResponseDto;
 import com.example.cloneproject15.dto.TokenDto;
 import com.example.cloneproject15.dto.UserRequestDto;
@@ -47,6 +48,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final RedisUtil redisUtil;
+    private final SentrySupport sentrySupport;
     private static final String S3_BUCKET_PREFIX = "S3";
 
     @Value("chattingroom")
@@ -60,6 +62,7 @@ public class UserService {
         String birthday = requestDto.getBirthday();
 
         if(!requestDto.getPassword().matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$")){ // 비밀번호 정규식 체크
+            sentrySupport.logSimpleMessage((ExceptionEnum.PASSWAORD_REGEX).getMessage());
             throw new ApiException(ExceptionEnum.PASSWAORD_REGEX);
         }
 
@@ -69,6 +72,7 @@ public class UserService {
         Optional<User> findUser = userRepository.findByUserid(userid);
 
         if(findUser.isPresent()){
+            sentrySupport.logSimpleMessage((ExceptionEnum.DUPLICATED_USER_NAME).getMessage());
             throw new ApiException(ExceptionEnum.DUPLICATED_USER_NAME);
         }
 
@@ -115,11 +119,13 @@ public class UserService {
 
         //사용자 존재하는지 예외처리
         if(user.isEmpty()){
-            throw new ApiException(ExceptionEnum.BAD_REQUEST);
+            sentrySupport.logSimpleMessage((ExceptionEnum.NOT_FOUND_USER).getMessage());
+            throw new ApiException(ExceptionEnum.NOT_FOUND_USER);
         }
 
         //비밀번호 확인
         if(!passwordEncoder.matches(password, user.get().getPassword())){
+            sentrySupport.logSimpleMessage((ExceptionEnum.BAD_REQUEST).getMessage());
             throw new ApiException(ExceptionEnum.BAD_REQUEST);
         }
 
@@ -152,6 +158,7 @@ public class UserService {
             refreshTokenRepository.deleteByUserid(user.getUserid());
             return new StatusResponseDto("로그아웃 성공");
         }
+        sentrySupport.logSimpleMessage((ExceptionEnum.NOT_FOUND_USER).getMessage());
         throw new ApiException(ExceptionEnum.NOT_FOUND_USER);
     }
 
@@ -164,6 +171,7 @@ public class UserService {
             List<User> userList = userRepository.findAllByOrderByUsernameDesc();
             return userList.stream().map(UserResponseDto::new).collect(Collectors.toList());
         }
+        sentrySupport.logSimpleMessage((ExceptionEnum.UNAUTHORIZED).getMessage());
         throw new ApiException(ExceptionEnum.UNAUTHORIZED);
     }
 
@@ -175,6 +183,7 @@ public class UserService {
         if(findUser.isPresent()){
             return new UserResponseDto(findUser.get());
         }
+        sentrySupport.logSimpleMessage((ExceptionEnum.NOT_FOUND_USER).getMessage());
         throw new ApiException(ExceptionEnum.NOT_FOUND_USER);
     }
 
@@ -196,6 +205,7 @@ public class UserService {
         );
 
         if(!userRequestDto.getPassword().matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$")){ // 비밀번호 정규식 체크
+            sentrySupport.logSimpleMessage((ExceptionEnum.PASSWAORD_REGEX).getMessage());
             throw new ApiException(ExceptionEnum.PASSWAORD_REGEX);
         }
 
@@ -230,7 +240,6 @@ public class UserService {
         }
 
         findUser.update(userRequestDto, image_url);
-//        user.update(userRequestDto);
         return ResponseEntity.status(HttpStatus.OK).body(new UserResponseDto(user));
     }
 

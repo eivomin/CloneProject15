@@ -87,7 +87,7 @@ public class KakaoService {
         body.add("grant_type", "authorization_code");
         body.add("client_id", "028ee58b17a56cabc49dd857ac4eef57");
         body.add("client_secret", "eFxP9dHAouovN9WB5s3F7qH2mwj3bYlB");
-        body.add("redirect_uri", "http://localhost:8080/oauth/kakao");
+        body.add("redirect_uri", "http://13.125.6.183:8080/oauth/kakao");
         body.add("code", code);
 
 
