@@ -20,27 +20,17 @@ public class ChatRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String roomId;
 
+    @Column(nullable = false)
     private String roomName;
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.REMOVE)
     List<Chat> chatLists = new ArrayList<>();
 
-    @Column(name = "host")
+    @Column(nullable = false, name = "host")
     private String host;
-
-//    @Column(name = "guest")
-//    private String guest;
-
-//    public static ChatRoom of(String host, String guest) {
-//        return ChatRoom.builder()
-//                .roomId(UUID.randomUUID().toString())
-//                .roomName(host + "님과의 대화 ο(=•ω＜=)ρ⌒☆")
-//                .host(host)
-//                .guest(guest)
-//                .build();
-//    }
 
     public ChatRoom(String roomName, String host) {
         this.roomId = UUID.randomUUID().toString();
@@ -48,18 +38,4 @@ public class ChatRoom {
         this.host = host;
     }
 
-    //private String lastChat;
-
-/*    public static ChatRoom of(Member host, Member guest) {
-        return ChatRoom.builder()
-                .roomId(UUID.randomUUID().toString())
-                .roomName(host.getNickname() + "님과의 대화 ο(=•ω＜=)ρ⌒☆")
-                .host(host.getNickname())
-                .guest(guest.getNickname())
-                .build();
-    }*/
-
-//    public boolean isHost(Member member) {
-//        return getHost().getId().equals(member.getId());
-//    }
 }

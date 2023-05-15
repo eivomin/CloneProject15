@@ -11,6 +11,8 @@ import com.example.cloneproject15.dto.UserResponseDto;
 import com.example.cloneproject15.entity.RefreshToken;
 import com.example.cloneproject15.entity.User;
 import com.example.cloneproject15.entity.UserRoleEnum;
+import com.example.cloneproject15.exception.ApiException;
+import com.example.cloneproject15.exception.ExceptionEnum;
 import com.example.cloneproject15.jwt.JwtUtil;
 import com.example.cloneproject15.redis.RedisUtil;
 import com.example.cloneproject15.repository.RefreshTokenRepository;
@@ -55,14 +57,19 @@ public class UserService {
 
         String userid = requestDto.getUserid();
         String username = requestDto.getUsername();
-        String password = passwordEncoder.encode(requestDto.getPassword());
         String birthday = requestDto.getBirthday();
+
+        if(!requestDto.getPassword().matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$")){ // 비밀번호 정규식 체크
+            throw new ApiException(ExceptionEnum.PASSWAORD_REGEX);
+        }
+
+        String password = passwordEncoder.encode(requestDto.getPassword());
 
         //중복된 아이디 값 체크
         Optional<User> findUser = userRepository.findByUserid(userid);
 
         if(findUser.isPresent()){
-            throw new IllegalStateException("중복된 아이디가 존재합니다.");
+            throw new ApiException(ExceptionEnum.DUPLICATED_USER_NAME);
         }
 
         //새로운 파일명 부여를 위한 현재 시간 알아내기
@@ -108,12 +115,12 @@ public class UserService {
 
         //사용자 존재하는지 예외처리
         if(user.isEmpty()){
-            throw new IllegalStateException("사용자가 존재하지 않습니다.");
+            throw new ApiException(ExceptionEnum.BAD_REQUEST);
         }
 
         //비밀번호 확인
         if(!passwordEncoder.matches(password, user.get().getPassword())){
-            throw new IllegalStateException("비밀번호가 일치하지 않습니다.");
+            throw new ApiException(ExceptionEnum.BAD_REQUEST);
         }
 
         //아이디 정보로 토큰 생성
@@ -139,14 +146,13 @@ public class UserService {
     public StatusResponseDto logout(User user, HttpServletRequest request) {
         Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUserid(user.getUserid());
         String accessToken = request.getHeader("ACCESS_KEY").substring(7);
-        System.out.println("accessToken : "+accessToken);
         if(refreshToken.isPresent()){
             Long tokenTime = jwtUtil.getExpirationTime(accessToken);
             redisUtil.setBlackList(accessToken, "access_token", tokenTime);
             refreshTokenRepository.deleteByUserid(user.getUserid());
             return new StatusResponseDto("로그아웃 성공");
         }
-        throw new IllegalStateException("로그아웃 실패");
+        throw new ApiException(ExceptionEnum.NOT_FOUND_USER);
     }
 
 
@@ -158,7 +164,7 @@ public class UserService {
             List<User> userList = userRepository.findAllByOrderByUsernameDesc();
             return userList.stream().map(UserResponseDto::new).collect(Collectors.toList());
         }
-        throw new IllegalStateException("권한이 없습니다");
+        throw new ApiException(ExceptionEnum.UNAUTHORIZED);
     }
 
     //특정 친구 조회
@@ -169,7 +175,7 @@ public class UserService {
         if(findUser.isPresent()){
             return new UserResponseDto(findUser.get());
         }
-        throw new IllegalStateException("유저 정보 조회 반환 실패");
+        throw new ApiException(ExceptionEnum.NOT_FOUND_USER);
     }
 
     // 마이페이지 조회

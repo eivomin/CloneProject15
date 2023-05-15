@@ -40,6 +40,7 @@ public class ChatController {
     public ResponseDto createChatRoom(@RequestBody ChatRoomDto chatRoomDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         // @Param sender should be replaced to UserDetails.getMember();
         chatRoomDto.setHost(userDetails.getUsername());
+        System.out.println("chatRoomDto : "+userDetails.getUsername());
         return chatService.createChatRoom(chatRoomDto.getRoomName(), chatRoomDto.getHost());
         // createChatRoom의 결과인 roomId와 type : ENTER을 저장한 chatDto에 넣어줘야함
     }
@@ -48,7 +49,6 @@ public class ChatController {
     @SendTo("/sub/chat/room")
     public void enterChatRoom(ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor, @AuthenticationPrincipal UserDetailsImpl userDetails) throws Exception {
         Thread.sleep(500); // simulated delay
-        //chatDto.setSender(userDetails.getUsername());
         ChatDto newchatdto = chatService.enterChatRoom(chatDto, headerAccessor);
         msgOperation.convertAndSend("/sub/chat/room" + chatDto.getRoomId(), newchatdto);
     }

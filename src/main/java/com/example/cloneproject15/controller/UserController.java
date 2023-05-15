@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,7 +31,7 @@ public class UserController {
     @Operation(summary = "유저 가입 API" , description = "새로운 유저 가입")
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "회원 가입 완료" )})
     @PostMapping("/signup")
-    public StatusResponseDto signup(UserRequestDto requestDto,
+    public StatusResponseDto signup(@Valid UserRequestDto requestDto,
                                     @RequestParam(value = "image", required = false) MultipartFile image) throws IOException {
         return userService.signup(requestDto, image);
     }
