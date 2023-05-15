@@ -3,7 +3,6 @@ package com.example.cloneproject15.jwt;
 import com.example.cloneproject15.dto.TokenDto;
 import com.example.cloneproject15.entity.RefreshToken;
 import com.example.cloneproject15.entity.UserRoleEnum;
-import com.example.cloneproject15.redis.RedisUtil;
 import com.example.cloneproject15.repository.RefreshTokenRepository;
 import com.example.cloneproject15.security.UserDetailsServiceImpl;
 import io.jsonwebtoken.*;
@@ -46,7 +45,6 @@ public class JwtUtil {
     private Key key;
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final RedisUtil redisUtil;
 
     public TokenDto creatAllToken(String username, UserRoleEnum userRole){
         return new TokenDto(createToken(username, userRole, "Access"), createToken(username, userRole, "Refresh"));
@@ -85,8 +83,6 @@ public class JwtUtil {
 
     // 토큰 검증
     public boolean validateToken(String token) {
-        if(redisUtil.hasKeyBlackList(token))
-            return false;
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;

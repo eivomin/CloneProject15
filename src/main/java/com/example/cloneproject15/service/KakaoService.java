@@ -38,15 +38,11 @@ public class KakaoService {
 
     public String kakaoLogin(String code, HttpServletResponse response) throws JsonProcessingException {
 
-        System.out.println("진입");
         // 1. "인가 코드"로 "액세스 토큰" 요청
         TokenDto tokenDto = getToken(code);
 
         String access_token = tokenDto.getAccessToken();
         String refresh_token = tokenDto.getRefreshToken();
-
-        System.out.println("access_token 반환 : "+access_token);
-        System.out.println("refresh_token 반환 : "+refresh_token);
 
         // 2. 토큰으로 카카오 API 호출 : "액세스 토큰"으로 "카카오 사용자 정보" 가져오기
         KakaoUserInfoDto kakaoUserInfo = getKakaoUserInfo(access_token);
@@ -89,7 +85,6 @@ public class KakaoService {
         body.add("client_secret", "eFxP9dHAouovN9WB5s3F7qH2mwj3bYlB");
         body.add("redirect_uri", "http://13.125.6.183:8080/oauth/kakao");
         body.add("code", code);
-
 
         // HTTP 요청 보내기
         HttpEntity<MultiValueMap<String, String>> kakaoTokenRequest =
@@ -134,9 +129,11 @@ public class KakaoService {
                 .get("nickname").asText();
         String email = jsonNode.get("kakao_account")
                 .get("email").asText();
+        String profile_image = jsonNode.get("properties")
+                        .get("profile_image").asText();
 
-        log.info("카카오 사용자 정보: " + id + ", " + nickname + ", " + email);
-        return new KakaoUserInfoDto(id, nickname, email);
+        System.out.println("카카오 정보 : "+jsonNode.toString());
+        return new KakaoUserInfoDto(id, nickname, email, profile_image);
     }
 
     // 3. 필요시에 회원가입
@@ -162,8 +159,10 @@ public class KakaoService {
                 // email: kakao email
                 String email = kakaoUserInfo.getEmail();
 
+                String image_url = kakaoUserInfo.getProfile_image();
+
                 //User(String userid, String password, String username, UserRoleEnum role, Long kakaoid, String email, String image_url, String birthday)
-                kakaoUser = new User("kakao", encodedPassword, kakaoUserInfo.getNickname(), UserRoleEnum.USER, kakaoId, email, "kakao", "kakao");
+                kakaoUser = new User("kakao", encodedPassword, kakaoUserInfo.getNickname(), UserRoleEnum.USER, kakaoId, email, image_url, "0000-00-00");
             }
 
             userRepository.save(kakaoUser);

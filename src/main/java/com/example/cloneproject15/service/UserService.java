@@ -15,7 +15,6 @@ import com.example.cloneproject15.entity.UserRoleEnum;
 import com.example.cloneproject15.exception.ApiException;
 import com.example.cloneproject15.exception.ExceptionEnum;
 import com.example.cloneproject15.jwt.JwtUtil;
-import com.example.cloneproject15.redis.RedisUtil;
 import com.example.cloneproject15.repository.RefreshTokenRepository;
 import com.example.cloneproject15.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,7 +46,6 @@ public class UserService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private final RedisUtil redisUtil;
     private final SentrySupport sentrySupport;
     private static final String S3_BUCKET_PREFIX = "S3";
 
@@ -154,7 +152,6 @@ public class UserService {
         String accessToken = request.getHeader("ACCESS_KEY").substring(7);
         if(refreshToken.isPresent()){
             Long tokenTime = jwtUtil.getExpirationTime(accessToken);
-            redisUtil.setBlackList(accessToken, "access_token", tokenTime);
             refreshTokenRepository.deleteByUserid(user.getUserid());
             return new StatusResponseDto("로그아웃 성공");
         }
