@@ -186,8 +186,46 @@ public class UserService {
 
     // 마이페이지 수정
     @Transactional
-    public ResponseEntity<UserResponseDto> updateMypage(UserRequestDto userRequestDto, User user) {
-        user.update(userRequestDto);
+    public ResponseEntity<UserResponseDto> updateMypage(UserRequestDto userRequestDto, MultipartFile image, User user)throws IOException {
+
+        String username = userRequestDto.getUsername();
+        String birthday = userRequestDto.getBirthday();
+
+//        if(!userRequestDto.getPassword().matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$")){ // 비밀번호 정규식 체크
+//            throw new ApiException(ExceptionEnum.PASSWAORD_REGEX);
+//        }
+
+        String password = passwordEncoder.encode(userRequestDto.getPassword());
+
+        //새로운 파일명 부여를 위한 현재 시간 알아내기
+        LocalDateTime now = LocalDateTime.now();
+        int hour = now.getHour();
+        int minute = now.getMinute();
+        int second = now.getSecond();
+        int millis = now.get(ChronoField.MILLI_OF_SECOND);
+
+        //기존 이미지 url로 설정
+        String image_url = user.getImage_url();
+
+        if(image != null){
+            //새로 부여한 이미지 명
+            String newFileName = "image"+hour+minute+second+millis;
+            String fileExtension = '.'+image.getOriginalFilename().replaceAll("^.*\\.(.*)$", "$1");
+            String imageName = S3_BUCKET_PREFIX + newFileName + fileExtension;
+
+            //메타데이터 설정
+            ObjectMetadata objectMetadata = new ObjectMetadata();
+            objectMetadata.setContentType(image.getContentType());
+            objectMetadata.setContentLength(image.getSize());
+
+            InputStream inputStream = image.getInputStream();
+
+            amazonS3.putObject(new PutObjectRequest(bucketName, imageName, inputStream, objectMetadata)
+                    .withCannedAcl(CannedAccessControlList.PublicRead));
+            image_url = amazonS3.getUrl(bucketName, imageName).toString();
+        }
+
+//        user.update(userRequestDto);
         return ResponseEntity.status(HttpStatus.OK).body(new UserResponseDto(user));
     }
 

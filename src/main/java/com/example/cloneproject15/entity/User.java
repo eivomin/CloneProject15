@@ -17,14 +17,14 @@ public class User extends TimeEntity{
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;
 
-    @Pattern(regexp = "[a-zA-Z0-9]{4,12}$", message="아이디는 알파벳 대문자, 소문자, 숫자 포함 4~12자리여야 합니다.")
+//    @Pattern(regexp = "[a-zA-Z0-9]{4,12}$", message="아이디는 알파벳 대문자, 소문자, 숫자 포함 4~12자리여야 합니다.")
     @Column(nullable = false)
     private String userid;
 
     @Column(nullable = false)
     private String password;
 
-    @Pattern(regexp = "[가-힣]{2,10}$", message="이름은 한글 2~10자리여야 합니다.")
+//    @Pattern(regexp = "[가-힣]{2,10}$", message="이름은 한글 2~10자리여야 합니다.")
     @Column(nullable = false)
     private String username;
 
@@ -67,8 +67,6 @@ public class User extends TimeEntity{
     public void update(UserRequestDto userRequestDto){
         this.password = userRequestDto.getPassword();
         this.username = userRequestDto.getUsername();
-//        this.email = userRequestDto.getEmail();
-//        this.image_url = userRequestDto.getImage_url();
         this.birthday = userRequestDto.getBirthday();
     }
 
