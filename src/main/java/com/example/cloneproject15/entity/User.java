@@ -21,6 +21,7 @@ public class User extends TimeEntity{
     private Long Id;
 
 //    @Pattern(regexp = "[a-zA-Z0-9]{4,12}$", message="아이디는 알파벳 대문자, 소문자, 숫자 포함 4~12자리여야 합니다.")
+//로그인시 작성한 userid
     @Column(nullable = false)
     private String userid;
 

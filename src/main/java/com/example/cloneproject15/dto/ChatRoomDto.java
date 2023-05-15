@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 //@Builder
@@ -14,6 +16,7 @@ public class ChatRoomDto {
     private String roomId;
     private String roomName;
     private String host;
+    //private List<String> guest;
 
     public ChatRoomDto(ChatRoom chatRoom) {
         this.roomId = chatRoom.getRoomId();
