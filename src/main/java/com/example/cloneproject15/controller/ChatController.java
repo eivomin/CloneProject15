@@ -4,6 +4,8 @@ package com.example.cloneproject15.controller;
 import com.example.cloneproject15.dto.ChatDto;
 import com.example.cloneproject15.dto.ChatRoomDto;
 import com.example.cloneproject15.dto.ResponseDto;
+import com.example.cloneproject15.entity.Chat;
+import com.example.cloneproject15.repository.ChatRepository;
 import com.example.cloneproject15.security.UserDetailsImpl;
 import com.example.cloneproject15.service.ChatService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,6 +38,8 @@ public class ChatController {
     private final ChatService chatService;
     private final SimpMessagingTemplate msgOperation;
 
+    private final ChatRepository chatRepository;
+
     @Operation(summary = "채팅방 생성 API" , description = "새로운 채팅방 생성")
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "채팅방 생성 완료" )})
     @PostMapping("/chat")
@@ -63,6 +67,8 @@ public class ChatController {
     public void sendChatRoom(ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
         Thread.sleep(500); // simulated delay
         msgOperation.convertAndSend("/sub/chat/room" + chatDto.getRoomId(), chatDto);
+        Chat chat = new Chat(chatDto);
+        chatRepository.save(chat);
     }
 
     @EventListener
