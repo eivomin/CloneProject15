@@ -1,4 +1,4 @@
-const auth = 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMTIiLCJhdXRoIjoiVVNFUiIsImV4cCI6MTY4NDE0OTg4OCwiaWF0IjoxNjg0MTQ2Mjg4fQ.ZivYvR1BRDcNKcxguAvpqbeW3z01guFZyutdk-NDF7I';
+const auth = 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMTIiLCJhdXRoIjoiVVNFUiIsImV4cCI6MTY4NDE1MzkyMCwiaWF0IjoxNjg0MTUwMzIwfQ.0RvNclwAzcsDFUGho8lRzDFH9K_myni5feM-A2tXS88';
 
 // 처음 로딩 시 사용자 정보 가져오기 (이름 및 폴더)
 if(auth !== '') {
