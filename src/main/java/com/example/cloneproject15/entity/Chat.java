@@ -1,13 +1,12 @@
 package com.example.cloneproject15.entity;
 
+import com.example.cloneproject15.dto.ChatDto;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -16,7 +15,8 @@ public class Chat extends TimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_Id")
     private ChatRoom room;
 
     //    @ManyToOne
@@ -25,6 +25,9 @@ public class Chat extends TimeEntity {
 
     private String message;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User user;
+
 /*    public static Chat of(ChatRequestDto dto, ChatRoom room, Member member){
         return Chat.builder()
                 .room(room)
@@ -32,4 +35,8 @@ public class Chat extends TimeEntity {
                 .message(dto.getMessage())
                 .build();
     }*/
+    public Chat (ChatDto chatDto) {
+        this.sender = chatDto.getSender();
+        this.message = chatDto.getMessage();
+    }
 }

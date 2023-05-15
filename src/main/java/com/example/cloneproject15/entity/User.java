@@ -8,6 +8,9 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -43,6 +46,9 @@ public class User extends TimeEntity{
 
     @Column(nullable = false)
     private String birthday;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Chat> chatList = new ArrayList<>();
 
     public User(String userid, String password, String username, UserRoleEnum role, String image_url, String birthday) {
         this.userid = userid;
