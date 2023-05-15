@@ -20,8 +20,12 @@ public class ChatDto {
 
     private MessageType type;
     private String sender;
+    private String userId;
+    private String date;
     private String roomId;
     private String message;
+    private String image;
+
 
 
 }

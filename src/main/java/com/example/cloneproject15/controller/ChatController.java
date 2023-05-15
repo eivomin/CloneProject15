@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -20,7 +19,10 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.util.List;
@@ -46,9 +48,11 @@ public class ChatController {
 
     @MessageMapping("/chat/enter")
     @SendTo("/sub/chat/room")
-    public void enterChatRoom(ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor, @AuthenticationPrincipal UserDetailsImpl userDetails) throws Exception {
+    public void enterChatRoom(ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
         Thread.sleep(500); // simulated delay
-        //chatDto.setSender(userDetails.getUsername());
+        //webSocketAuthInterceptor.beforeHandshake()
+        String username = (String) headerAccessor.getSessionAttributes().get("username");
+        chatDto.setSender(username);
         ChatDto newchatdto = chatService.enterChatRoom(chatDto, headerAccessor);
         msgOperation.convertAndSend("/sub/chat/room" + chatDto.getRoomId(), newchatdto);
     }
