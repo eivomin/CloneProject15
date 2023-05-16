@@ -12,7 +12,6 @@ import java.util.UUID;
 
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatRoom {
@@ -32,18 +31,10 @@ public class ChatRoom {
     @Column(nullable = false, name = "host")
     private String host;
 
-//    @OneToMany
-//    @JoinColumn(name = "user_id")  //users테이블의 user_id
-//    private List<User> userList = new ArrayList<>();
-
     public ChatRoom(String roomName, String host) {
         this.roomId = UUID.randomUUID().toString();
         this.roomName = roomName;
         this.host = host;
     }
-
-//    public void addUserList (User user){
-//        this.userList.add(user);
-//    }
 
 }

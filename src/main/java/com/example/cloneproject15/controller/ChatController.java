@@ -47,30 +47,15 @@ public class ChatController {
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "채팅방 생성 완료" )})
     @PostMapping("/chat")
     public ResponseDto createChatRoom(@RequestBody ChatRoomDto chatRoomDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        // @Param sender should be replaced to UserDetails.getMember();
         chatRoomDto.setHost(userDetails.getUsername());
-        //System.out.println("chatRoomDto : "+userDetails.getUsername());
         return chatService.createChatRoom(chatRoomDto.getRoomName(), chatRoomDto.getHost());
-        // createChatRoom의 결과인 roomId와 type : ENTER을 저장한 chatDto에 넣어줘야함
     }
 
     @MessageMapping("/chat/enter")
     @SendTo("/sub/chat/room")
     public void enterChatRoom(ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
         Thread.sleep(500); // simulated delay
-        //webSocketAuthInterceptor.beforeHandshake()
-        //String username = (String) headerAccessor.getSessionAttributes().get("username");
-        //chatDto.setSender(username);
         ChatDto newchatdto = chatService.enterChatRoom(chatDto, headerAccessor);
-
-//        ChatRoom room = chatRoomRepository.findByRoomId(chatDto.getRoomId()).orElseThrow(
-//                () -> new IllegalArgumentException("존재하지 않는 채팅방입니다.")
-//        );
-//
-//        User user = userRepository.findByUsername(chatDto.getSender()).orElseThrow(
-//                () -> new IllegalArgumentException("존재하지 않는 유저입니다.")
-//        );
-//        room.addUserList(user);
         msgOperation.convertAndSend("/sub/chat/room" + chatDto.getRoomId(), newchatdto);
     }
 
@@ -82,9 +67,8 @@ public class ChatController {
         ChatRoom room = roomIdCheck(chatDto.getRoomId());
         User user = userNameCheck(chatDto.getSender());
         msgOperation.convertAndSend("/sub/chat/room" + chatDto.getRoomId(), chatDto);
-        Chat chat = new Chat(chatDto);
-        chat.setRoom(room);
-        chat.setUser(user);
+        Chat chat = new Chat(chatDto, room, user);
+
         chatRepository.save(chat);
     }
 
@@ -95,20 +79,17 @@ public class ChatController {
         msgOperation.convertAndSend("/sub/chat/room" + chatDto.getRoomId(), chatDto);
     }
 
-//    채팅방 목록 조회
     @GetMapping("/room")
     public List<ChatRoomDto> showRoomList() {
         return chatService.showRoomList();
     }
 
-    //방의 존재유무 확인
     public ChatRoom roomIdCheck(String roomId) {
         return chatRoomRepository.findByRoomId(roomId).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않는 채팅방입니다.")
         );
     }
 
-    //유저 확인
     public User userNameCheck(String userName) {
         return userRepository.findByUsername(userName).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않는 유저입니다.")

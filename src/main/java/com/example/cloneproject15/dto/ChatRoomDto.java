@@ -11,7 +11,6 @@ import java.util.List;
 @Getter
 @Setter
 //@Builder
-@AllArgsConstructor
 public class ChatRoomDto {
     private String roomId;
     private String roomName;
@@ -22,5 +21,11 @@ public class ChatRoomDto {
         this.roomId = chatRoom.getRoomId();
         this.roomName = chatRoom.getRoomName();
         this.host = chatRoom.getHost();
+    }
+
+    public ChatRoomDto(String roomId, String roomName, String host) {
+        this.roomId = roomId;
+        this.roomName = roomName;
+        this.host = host;
     }
 }
