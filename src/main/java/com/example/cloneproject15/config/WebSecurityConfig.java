@@ -72,6 +72,7 @@ public class WebSecurityConfig {
                 .requestMatchers("/**").permitAll()
                 .requestMatchers("/users/signup").permitAll()
                 .requestMatchers("/users/login").permitAll()
+                .requestMatchers("/chat").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/read/**").permitAll()
                 .requestMatchers(PERMIT_URL_ARRAY).permitAll()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
