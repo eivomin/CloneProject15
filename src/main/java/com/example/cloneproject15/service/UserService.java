@@ -149,14 +149,18 @@ public class UserService {
     }
 
     public StatusResponseDto logout(User user) {
-
-        Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUserid(user.getUserid());
-        if(refreshToken.isPresent()){
-            refreshTokenRepository.deleteByUserid(user.getUserid());
-            return new StatusResponseDto("로그아웃 성공");
-        }
-        sentrySupport.logSimpleMessage((ExceptionEnum.NOT_FOUND_USER).getMessage());
-        throw new ApiException(ExceptionEnum.NOT_FOUND_USER);
+        RefreshToken refreshToken = refreshTokenRepository.findByUserid(user.getUserid()).orElseThrow(
+                () -> new IllegalArgumentException("리프레시 토큰 없습니다.")
+        );
+        refreshTokenRepository.delete(refreshToken);
+        //Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUserid(user.getUserid());
+        return new StatusResponseDto("로그아웃 성공");
+//        if(refreshToken.isPresent()){
+//            refreshTokenRepository.delete(refreshToken);
+//            return new StatusResponseDto("로그아웃 성공");
+//        }
+//        sentrySupport.logSimpleMessage((ExceptionEnum.NOT_FOUND_USER).getMessage());
+//        throw new ApiException(ExceptionEnum.NOT_FOUND_USER);
     }
 
 

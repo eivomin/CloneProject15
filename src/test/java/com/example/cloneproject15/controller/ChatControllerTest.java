@@ -34,19 +34,7 @@ class ChatControllerTest {
     }
 
     @Test
-    @DisplayName("채팅방 조회 API")
     void findChatRoomTest() {
-//        // Mock 객체
-//        ChatService chatService = Mockito.mock(ChatService.class);
-//
-//        //String sender, String userId, String roomId, String image_url
-//        EnterUserDto testEnterUserDto = new EnterUserDto("김수박", "user1", "1a4a80c3-cd10-45a9-9f5d-e481857ea2a3", "https://chattingroom.s3.ap-northeast-2.amazonaws.com/S3image182630819.webp");
-//        Mockito.when(chatService.findRoom(Mockito.anyString(), Mockito.anyString()))
-//                .thenReturn(testEnterUserDto);
-//
-//        String roomId = "1a4a80c3-cd10-45a9-9f5d-e481857ea2a3";
-//        UserDetailsImpl userDetails = new UserDetailsImpl(new User("user1", "Testtest123", "김수박", UserRoleEnum.USER, null, "null", null, "1993-06-07" ));
-//        testEnterUserDto
     }
 
     @Test
