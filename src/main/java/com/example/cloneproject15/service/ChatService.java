@@ -2,11 +2,13 @@ package com.example.cloneproject15.service;
 
 import com.example.cloneproject15.dto.ChatDto;
 import com.example.cloneproject15.dto.ChatRoomDto;
+import com.example.cloneproject15.dto.EnterUserDto;
 import com.example.cloneproject15.dto.ResponseDto;
 import com.example.cloneproject15.entity.ChatRoom;
 import com.example.cloneproject15.entity.User;
 import com.example.cloneproject15.repository.ChatRoomRepository;
 import com.example.cloneproject15.repository.UserRepository;
+import com.example.cloneproject15.security.UserDetailsImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -108,5 +110,13 @@ public class ChatService {
         return userRepository.findByUsername(userName).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않는 유저입니다.")
         );
+    }
+
+    public EnterUserDto findRoom(String roomId, String userName) {
+        ChatRoom chatRoom = roomIdCheck(roomId);
+        System.out.println("chatRoom = " + chatRoom.getRoomId());
+        User user = userNameCheck(userName);
+        System.out.println("user.getUsername() = " + user.getUsername());
+        return new EnterUserDto(userName, user.getUserid(), chatRoom.getRoomId(), user.getImage_url());
     }
 }

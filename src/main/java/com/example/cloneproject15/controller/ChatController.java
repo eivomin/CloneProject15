@@ -7,6 +7,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.example.cloneproject15.dto.ChatDto;
 import com.example.cloneproject15.dto.ChatRoomDto;
+import com.example.cloneproject15.dto.EnterUserDto;
 import com.example.cloneproject15.dto.ResponseDto;
 import com.example.cloneproject15.entity.Chat;
 import com.example.cloneproject15.entity.ChatRoom;
@@ -66,21 +67,26 @@ public class ChatController {
     @Operation(summary = "채팅방 생성 API" , description = "새로운 채팅방 생성")
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "채팅방 생성 완료" )})
     @PostMapping("/chat")
-    public ResponseDto createChatRoom(@Payload ChatRoomDto chatRoomDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        chatRoomDto.setHost(userDetails.getUsername());
+    public ResponseDto createChatRoom(@RequestBody ChatRoomDto chatRoomDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        chatRoomDto.setHost(userDetails.getUser().getUsername());
         return chatService.createChatRoom(chatRoomDto.getRoomName(), chatRoomDto.getHost());
+    }
+
+    @GetMapping("/chat/{roomId}")
+    public EnterUserDto findChatRoom(@PathVariable String roomId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        System.out.println("userDetails = " + userDetails.getUser().getUsername());
+        return chatService.findRoom(roomId, userDetails.getUser().getUsername());
     }
 
     @MessageMapping("/chat/enter")
     @SendTo("/sub/chat/room")
-    public ResponseDto enterChatRoom(@Payload ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
+    public void enterChatRoom(@RequestBody ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
         Thread.sleep(500); // simulated delay
         ChatDto newchatdto = chatService.enterChatRoom(chatDto, headerAccessor);
 //        User user = userNameCheck(chatDto.getSender());
 //        ChatRoom room = roomIdCheck(chatDto.getRoomId());
 //        user.enterRoom(room);  // --->transactional?
         msgOperation.convertAndSend("/sub/chat/room" + chatDto.getRoomId(), newchatdto);
-        return ResponseDto.setSuccess("enter room success", chatDto.getRoomId());
     }
 
     @MessageMapping("/chat/send")
