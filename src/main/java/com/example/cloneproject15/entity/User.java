@@ -12,10 +12,10 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
+@Entity(name = "users")
 @Getter
 @NoArgsConstructor
-@Table(name = "users")
+//@Table
 public class User extends TimeEntity{
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

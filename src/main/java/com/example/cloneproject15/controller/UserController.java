@@ -80,4 +80,13 @@ public class UserController {
         return userService.updateMypage(userRequestDto, image, userDetails.getUser());
     }
 
+    @Operation(summary = "유저 최신 생일 목록조회 API" , description = "유저 최신 생일 목록조회, AccessToken")
+    @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "유저 최신 생일 목록조회 성공!" )})
+    @GetMapping("/mypage/birthday")
+    public List<UserResponseDto> checkUserByBirthday(@AuthenticationPrincipal UserDetailsImpl userDetails){
+        String userid = userDetails.getUsername();
+        return userService.checkUserByBirthday(userid);
+    }
+
+
 }

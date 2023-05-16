@@ -240,4 +240,9 @@ public class UserService {
         return ResponseEntity.status(HttpStatus.OK).body(new UserResponseDto(user));
     }
 
+    @Transactional(readOnly = true)
+    public List<UserResponseDto> checkUserByBirthday(String userid) {
+        List<User> userList = userRepository.findByUserAndBirthday();
+        return userList.stream().map(UserResponseDto::new).collect(Collectors.toList());
+    }
 }

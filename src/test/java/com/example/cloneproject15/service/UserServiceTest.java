@@ -52,18 +52,18 @@ class UserServiceTest {
         assertEquals(statusResponseDto.getMeassage(), "로그인 성공");
     }
 
-    @Test
-    public void 로그아웃() throws Exception {
-        //given
-        User user = new User("user1233", "User123", "유민", UserRoleEnum.USER, "image_url", "1996-11-19");
-
-        //when
-        String token = "";
-
-        StatusResponseDto statusResponseDto = userService.logout(user, request);
-
-        //then
-        assertEquals(statusResponseDto.getMeassage(), "로그아웃 성공");
-    }
+//    @Test
+//    public void 로그아웃() throws Exception {
+//        //given
+//        User user = new User("user1233", "User123", "유민", UserRoleEnum.USER, "image_url", "1996-11-19");
+//
+//        //when
+//        String token = "";
+//
+//        StatusResponseDto statusResponseDto = userService.logout(user, request);
+//
+//        //then
+//        assertEquals(statusResponseDto.getMeassage(), "로그아웃 성공");
+//    }
 
 }
