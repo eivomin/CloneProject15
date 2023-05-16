@@ -6,6 +6,7 @@ import com.example.cloneproject15.dto.ResponseDto;
 import com.example.cloneproject15.entity.ChatRoom;
 import com.example.cloneproject15.entity.User;
 import com.example.cloneproject15.repository.ChatRoomRepository;
+import com.example.cloneproject15.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 public class ChatService {
 
     private final ChatRoomRepository chatRoomRepository;
+    private final UserRepository userRepository;
 
     public ResponseDto createChatRoom(String roomName, String host) {
         //이미 reciever와 sender로 생성된 채팅방이 있는지 확인
@@ -47,6 +49,10 @@ public class ChatService {
         //반환 결과를 socket session에 사용자의 id로 저장
         headerAccessor.getSessionAttributes().put("nickname", chatDto.getSender());
         headerAccessor.getSessionAttributes().put("roomId", chatDto.getRoomId());
+
+        User user = userNameCheck(chatDto.getSender());
+        ChatRoom room = roomIdCheck(chatDto.getRoomId());
+        user.enterRoom(room);
 
         chatDto.setMessage(chatDto.getSender() + "님 입장!! ο(=•ω＜=)ρ⌒☆");
         return chatDto;
@@ -87,5 +93,17 @@ public class ChatService {
             chatRoomDtoList.add(chatRoomDto);
         }
         return chatRoomDtoList;
+    }
+
+    public ChatRoom roomIdCheck(String roomId) {
+        return chatRoomRepository.findByRoomId(roomId).orElseThrow(
+                () -> new IllegalArgumentException("존재하지 않는 채팅방입니다.")
+        );
+    }
+
+    public User userNameCheck(String userName) {
+        return userRepository.findByUsername(userName).orElseThrow(
+                () -> new IllegalArgumentException("존재하지 않는 유저입니다.")
+        );
     }
 }

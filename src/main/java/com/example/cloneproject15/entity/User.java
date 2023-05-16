@@ -1,5 +1,6 @@
 package com.example.cloneproject15.entity;
 
+import com.example.cloneproject15.dto.EnterUserDto;
 import com.example.cloneproject15.dto.UserRequestDto;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
@@ -50,6 +51,10 @@ public class User extends TimeEntity{
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Chat> chatList = new ArrayList<>();
 
+    @ManyToOne
+    private ChatRoom room;
+
+
     public User(String userid, String password, String username, UserRoleEnum role, String image_url, String birthday) {
         this.userid = userid;
         this.password = password;
@@ -58,8 +63,6 @@ public class User extends TimeEntity{
         this.image_url = image_url;
         this.birthday = birthday;
     }
-
-
 
     public User(String userid, String password, String username, UserRoleEnum role, Long kakaoid, String email, String image_url, String birthday) {
         this.userid = userid;
@@ -83,6 +86,10 @@ public class User extends TimeEntity{
     public User kakaoIdUpdate(Long kakaoid) {
         this.kakaoid = kakaoid;
         return this;
+    }
+
+    public void enterRoom(ChatRoom room) {
+        this.room = room;
     }
 
 }

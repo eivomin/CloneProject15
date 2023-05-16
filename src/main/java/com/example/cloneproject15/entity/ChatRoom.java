@@ -28,7 +28,11 @@ public class ChatRoom {
     @OneToMany(mappedBy = "room", cascade = CascadeType.REMOVE)
     private List<Chat> chatLists = new ArrayList<>();
 
-    @Column(nullable = false, name = "host")
+//    @OneToMany
+//    @JoinColumn(name = "chatroom_id")
+//    private List<User> userLists = new ArrayList<>();
+
+    @Column(nullable = false)
     private String host;
 
     public ChatRoom(String roomName, String host) {

@@ -51,7 +51,6 @@ public class UserController {
         return userService.logout(userDetails.getUser(), request);
     }
 
-    //친구 목록 조회
     @Operation(summary = "유저 목록 API" , description = "유저목록조회, AccessToken")
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "유저목록 조회 반환 성공!" )})
     @GetMapping("/user-info")
@@ -60,7 +59,6 @@ public class UserController {
         return userService.getUsers(userid);
     }
 
-    // 특정 친구 조회
     @Operation(summary = "특정 유저 정보조회 API" , description = "유저정보조회, AccessToken")
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "유저정보 조회 반환 성공!" )})
     @GetMapping("/user-info/{userId}")
@@ -68,8 +66,6 @@ public class UserController {
         return userService.findUserInfo(userId);
     }
 
-
-    // 마이페이지 조회
     @Operation(summary = "마이페이지 API" , description = "마이페이지 조회, AccessToken")
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "마이페이지 반환 성공!" )})
     @GetMapping("/mypage")
@@ -77,7 +73,6 @@ public class UserController {
         return userService.myPage(userDetails.getUser());
     }
 
-    // 마이페이지 수정
     @Operation(summary = "마이페이지 수정 API" , description = "마이페이지 수정, AccessToken")
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "마이페이지 수정 성공!" )})
     @PutMapping("/mypage")

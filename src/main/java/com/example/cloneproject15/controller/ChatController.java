@@ -64,12 +64,12 @@ public class ChatController {
     @Transactional
     public void sendChatRoom(ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
         Thread.sleep(500); // simulated delay
-        ChatRoom room = roomIdCheck(chatDto.getRoomId());
-        User user = userNameCheck(chatDto.getSender());
+//        ChatRoom room = roomIdCheck(chatDto.getRoomId());
+//        User user = userNameCheck(chatDto.getSender());
         msgOperation.convertAndSend("/sub/chat/room" + chatDto.getRoomId(), chatDto);
-        Chat chat = new Chat(chatDto, room, user);
+//        Chat chat = new Chat(chatDto, room, user);
 
-        chatRepository.save(chat);
+//        chatRepository.save(chat);
     }
 
     @EventListener
@@ -84,16 +84,6 @@ public class ChatController {
         return chatService.showRoomList();
     }
 
-    public ChatRoom roomIdCheck(String roomId) {
-        return chatRoomRepository.findByRoomId(roomId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 채팅방입니다.")
-        );
-    }
 
-    public User userNameCheck(String userName) {
-        return userRepository.findByUsername(userName).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 유저입니다.")
-        );
-    }
 
 }
