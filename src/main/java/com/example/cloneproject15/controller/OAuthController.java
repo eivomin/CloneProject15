@@ -23,8 +23,6 @@ public class OAuthController {
 
     @GetMapping("/oauth/kakao")
     public String kakaoLogin(@RequestParam String code, HttpServletResponse response) throws JsonProcessingException {
-        // code: 카카오 서버로부터 받은 인가 코드
-        System.out.println("컨트롤러 진입");
         return kakaoService.kakaoLogin(code, response);
 
     }

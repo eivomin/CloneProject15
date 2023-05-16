@@ -28,4 +28,6 @@ public class ChatRoomDto {
         this.roomName = roomName;
         this.host = host;
     }
+
+
 }

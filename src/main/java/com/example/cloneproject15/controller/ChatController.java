@@ -47,14 +47,14 @@ public class ChatController {
     @Operation(summary = "채팅방 생성 API" , description = "새로운 채팅방 생성")
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "채팅방 생성 완료" )})
     @PostMapping("/chat")
-    public ResponseDto createChatRoom(@Payload ChatRoomDto chatRoomDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseDto createChatRoom(@RequestBody ChatRoomDto chatRoomDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         chatRoomDto.setHost(userDetails.getUsername());
         return chatService.createChatRoom(chatRoomDto.getRoomName(), chatRoomDto.getHost());
     }
 
     @MessageMapping("/chat/enter")
     @SendTo("/sub/chat/room")
-    public ResponseDto enterChatRoom(@Payload ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
+    public ResponseDto enterChatRoom(@RequestBody ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
         Thread.sleep(500); // simulated delay
         ChatDto newchatdto = chatService.enterChatRoom(chatDto, headerAccessor);
 //        User user = userNameCheck(chatDto.getSender());
@@ -67,14 +67,14 @@ public class ChatController {
     @MessageMapping("/chat/send")
     @SendTo("/sub/chat/room")
     @Transactional
-    public void sendChatRoom(@RequestBody ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
+    public String sendChatRoom(@RequestBody ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
         Thread.sleep(500); // simulated delay
         ChatRoom room = roomIdCheck(chatDto.getRoomId());
         User user = userNameCheck(chatDto.getSender());
         msgOperation.convertAndSend("/sub/chat/room" + chatDto.getRoomId(), chatDto);
        Chat chat = new Chat(chatDto, room, user);
-
        chatRepository.save(chat);
+       return "sendChatRoom";
     }
 
     @EventListener

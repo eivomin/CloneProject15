@@ -83,7 +83,7 @@ public class KakaoService {
         body.add("grant_type", "authorization_code");
         body.add("client_id", "028ee58b17a56cabc49dd857ac4eef57");
         body.add("client_secret", "eFxP9dHAouovN9WB5s3F7qH2mwj3bYlB");
-        body.add("redirect_uri", "http://13.125.6.183:8080/oauth/kakao");
+        body.add("redirect_uri", "http://localhost:8080/oauth/kakao");
         body.add("code", code);
 
         // HTTP 요청 보내기
@@ -108,7 +108,8 @@ public class KakaoService {
     private KakaoUserInfoDto getKakaoUserInfo(String accessToken) throws JsonProcessingException {
         // HTTP Header 생성
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + accessToken);
+        //headers.add("Authorization", "Bearer " + accessToken);
+        //headers.add("Authorization", "KakaoAK 7d9f7154caca96a98d75bf22965e5a20");
         headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
         // HTTP 요청 보내기
@@ -131,6 +132,7 @@ public class KakaoService {
                 .get("email").asText();
         String profile_image = jsonNode.get("properties")
                         .get("profile_image").asText();
+
 
         System.out.println("카카오 정보 : "+jsonNode.toString());
         return new KakaoUserInfoDto(id, nickname, email, profile_image);
@@ -161,7 +163,9 @@ public class KakaoService {
 
                 String image_url = kakaoUserInfo.getProfile_image();
 
-                kakaoUser = new User("kakao", encodedPassword, kakaoUserInfo.getNickname(), UserRoleEnum.USER, kakaoId, email, image_url, "0000-00-00");
+                String birthday = "0000-00-00";
+
+                kakaoUser = new User("kakao", encodedPassword, kakaoUserInfo.getNickname(), UserRoleEnum.USER, kakaoId, email, image_url, birthday);
             }
 
             userRepository.save(kakaoUser);
