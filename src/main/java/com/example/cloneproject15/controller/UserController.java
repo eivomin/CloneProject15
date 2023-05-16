@@ -1,5 +1,6 @@
 package com.example.cloneproject15.controller;
 
+import com.example.cloneproject15.dto.ResponseDto;
 import com.example.cloneproject15.dto.StatusResponseDto;
 import com.example.cloneproject15.dto.UserRequestDto;
 import com.example.cloneproject15.dto.UserResponseDto;
@@ -47,8 +48,8 @@ public class UserController {
     @Operation(summary = "유저 로그아웃 API" , description = "로그아웃, RefreshToken, AccessToken")
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "로그아웃 성공!" )})
     @PostMapping("/logout")
-    public StatusResponseDto logout(@AuthenticationPrincipal UserDetailsImpl userDetails, HttpServletRequest request){
-        return userService.logout(userDetails.getUser(), request);
+    public StatusResponseDto logout(@AuthenticationPrincipal UserDetailsImpl userDetails){
+        return userService.logout(userDetails.getUser());
     }
 
     @Operation(summary = "유저 목록 API" , description = "유저목록조회, AccessToken")
@@ -88,5 +89,11 @@ public class UserController {
         return userService.checkUserByBirthday(userid);
     }
 
+    @Operation(summary = "유저 아이디 중복 여부" , description = "중복 여부 확인")
+    @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "아이디 중복여부 확인" )})
+    @GetMapping("/userCheck/{userId}")
+    public ResponseDto userCheck(@Valid @PathVariable String userId) {
+        return userService.userCheck(userId);
+    }
 
 }

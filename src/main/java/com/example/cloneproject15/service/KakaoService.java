@@ -108,8 +108,7 @@ public class KakaoService {
     private KakaoUserInfoDto getKakaoUserInfo(String accessToken) throws JsonProcessingException {
         // HTTP Header 생성
         HttpHeaders headers = new HttpHeaders();
-        //headers.add("Authorization", "Bearer " + accessToken);
-        //headers.add("Authorization", "KakaoAK 7d9f7154caca96a98d75bf22965e5a20");
+        headers.add("Authorization", "Bearer " + accessToken);
         headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
         // HTTP 요청 보내기

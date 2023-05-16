@@ -5,10 +5,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.example.cloneproject15.config.SentrySupport;
-import com.example.cloneproject15.dto.StatusResponseDto;
-import com.example.cloneproject15.dto.TokenDto;
-import com.example.cloneproject15.dto.UserRequestDto;
-import com.example.cloneproject15.dto.UserResponseDto;
+import com.example.cloneproject15.dto.*;
 import com.example.cloneproject15.entity.RefreshToken;
 import com.example.cloneproject15.entity.User;
 import com.example.cloneproject15.entity.UserRoleEnum;
@@ -22,6 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,6 +33,9 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.example.cloneproject15.dto.StatusCode.BAD_REQUEST;
+import static com.example.cloneproject15.dto.StatusCode.OK;
 
 @Service
 @RequiredArgsConstructor
@@ -81,7 +82,7 @@ public class UserService {
         int second = now.getSecond();
         int millis = now.get(ChronoField.MILLI_OF_SECOND);
 
-        String image_url = null;
+        String image_url = "https://chattingroom.s3.ap-northeast-2.amazonaws.com/S3image171054617.jpg";
 
         if(image != null){
             //새로 부여한 이미지 명
@@ -147,11 +148,10 @@ public class UserService {
         return new StatusResponseDto("로그인 성공");
     }
 
-    public StatusResponseDto logout(User user, HttpServletRequest request) {
+    public StatusResponseDto logout(User user) {
+
         Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUserid(user.getUserid());
-        String accessToken = request.getHeader("ACCESS_KEY").substring(7);
         if(refreshToken.isPresent()){
-            Long tokenTime = jwtUtil.getExpirationTime(accessToken);
             refreshTokenRepository.deleteByUserid(user.getUserid());
             return new StatusResponseDto("로그아웃 성공");
         }
@@ -244,5 +244,29 @@ public class UserService {
     public List<UserResponseDto> checkUserByBirthday(String userid) {
         List<User> userList = userRepository.findByUserAndBirthday();
         return userList.stream().map(UserResponseDto::new).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public ResponseDto userCheck(String userId) {
+        Optional<User> found = userRepository.findByUserid(userId);
+        String namePattern = "[a-zA-Z0-9]{4,12}$";
+        int chk = userId.length();
+        if (found.isPresent()) {
+            return  ResponseDto.set(BAD_REQUEST,"아이디 중복", null);
+        }
+        else {
+            if (!userId.matches(namePattern)) {
+                return ResponseDto.set(BAD_REQUEST, "소문자와 숫자만 입력 가능합니다.", null);
+            }
+            else if(chk < 4) {
+                return  ResponseDto.set(BAD_REQUEST, "id 크기는 4 이상, 12 이하만 가능합니다.", null);
+            }
+            else if(chk > 10) {
+                return ResponseDto.set(BAD_REQUEST,"id 크기는 4 이상, 12 이하만 가능합니다.",null);
+            }
+            else {
+                return ResponseDto.set(OK,"사용가능한 아이디 입니다.", null);
+            }
+        }
     }
 }

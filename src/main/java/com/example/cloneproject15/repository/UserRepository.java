@@ -20,5 +20,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM users u WHERE str_to_date(concat(Year(Date(NOW())),substr(u.birthday, 5)), '%Y-%m-%d') between CURDATE() and CURDATE()+5")
     List<User> findByUserAndBirthday();
+
+
   }
 
