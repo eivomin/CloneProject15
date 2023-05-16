@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -46,30 +47,34 @@ public class ChatController {
     @Operation(summary = "채팅방 생성 API" , description = "새로운 채팅방 생성")
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "채팅방 생성 완료" )})
     @PostMapping("/chat")
-    public ResponseDto createChatRoom(@RequestBody ChatRoomDto chatRoomDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseDto createChatRoom(@Payload ChatRoomDto chatRoomDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         chatRoomDto.setHost(userDetails.getUsername());
         return chatService.createChatRoom(chatRoomDto.getRoomName(), chatRoomDto.getHost());
     }
 
     @MessageMapping("/chat/enter")
     @SendTo("/sub/chat/room")
-    public void enterChatRoom(ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
+    public ResponseDto enterChatRoom(@Payload ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
         Thread.sleep(500); // simulated delay
         ChatDto newchatdto = chatService.enterChatRoom(chatDto, headerAccessor);
+//        User user = userNameCheck(chatDto.getSender());
+//        ChatRoom room = roomIdCheck(chatDto.getRoomId());
+//        user.enterRoom(room);  // --->transactional?
         msgOperation.convertAndSend("/sub/chat/room" + chatDto.getRoomId(), newchatdto);
+        return ResponseDto.setSuccess("enter room success", chatDto.getRoomId());
     }
 
     @MessageMapping("/chat/send")
     @SendTo("/sub/chat/room")
     @Transactional
-    public void sendChatRoom(ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
+    public void sendChatRoom(@RequestBody ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
         Thread.sleep(500); // simulated delay
-//        ChatRoom room = roomIdCheck(chatDto.getRoomId());
-//        User user = userNameCheck(chatDto.getSender());
+        ChatRoom room = roomIdCheck(chatDto.getRoomId());
+        User user = userNameCheck(chatDto.getSender());
         msgOperation.convertAndSend("/sub/chat/room" + chatDto.getRoomId(), chatDto);
-//        Chat chat = new Chat(chatDto, room, user);
+       Chat chat = new Chat(chatDto, room, user);
 
-//        chatRepository.save(chat);
+       chatRepository.save(chat);
     }
 
     @EventListener
@@ -84,6 +89,18 @@ public class ChatController {
         return chatService.showRoomList();
     }
 
+    //방의 존재유무 확인
+    public ChatRoom roomIdCheck(String roomId) {
+        return chatRoomRepository.findByRoomId(roomId).orElseThrow(
+                () -> new IllegalArgumentException("존재하지 않는 채팅방입니다.")
+        );
+    }
 
+    //유저 확인
+    public User userNameCheck(String userName) {
+        return userRepository.findByUsername(userName).orElseThrow(
+                () -> new IllegalArgumentException("존재하지 않는 유저입니다.")
+        );
+    }
 
 }

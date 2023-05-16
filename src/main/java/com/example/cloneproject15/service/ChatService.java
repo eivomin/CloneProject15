@@ -61,6 +61,9 @@ public class ChatService {
     public ChatDto disconnectChatRoom(SimpMessageHeaderAccessor headerAccessor) {
         String roomId = (String) headerAccessor.getSessionAttributes().get("roomId");
         String nickName = (String) headerAccessor.getSessionAttributes().get("nickname");
+        User user = userNameCheck(nickName);
+        ChatRoom room = roomIdCheck(roomId);
+        user.exitRoom(room);
 
 //        chatRoomRepository.deleteByRoomId(roomId);
 

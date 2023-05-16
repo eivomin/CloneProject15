@@ -92,4 +92,7 @@ public class User extends TimeEntity{
         this.room = room;
     }
 
+    public void exitRoom(ChatRoom room) {
+        this.room = null;
+    }
 }
