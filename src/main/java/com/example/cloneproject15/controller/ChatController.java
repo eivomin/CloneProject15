@@ -146,10 +146,6 @@ public class ChatController {
         return chatService.showRoomList();
     }
 
-
-
-
-
     //방의 존재유무 확인
     public ChatRoom roomIdCheck(String roomId) {
         return chatRoomRepository.findByRoomId(roomId).orElseThrow(
