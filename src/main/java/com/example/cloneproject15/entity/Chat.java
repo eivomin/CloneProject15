@@ -21,13 +21,17 @@ public class Chat extends TimeEntity {
 
     private String message;
 
+    @Column(nullable = true)
+    private String iamge_url;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    public Chat (ChatDto chatDto, ChatRoom room, User user) {
+    public Chat (ChatDto chatDto, String image_url, ChatRoom room, User user) {
         this.sender = chatDto.getSender();
         this.message = chatDto.getMessage();
+        this.iamge_url = image_url;
         this.room = room;
         this.user = user;
     }
