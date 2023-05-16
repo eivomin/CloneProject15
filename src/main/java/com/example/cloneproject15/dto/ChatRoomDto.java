@@ -1,21 +1,17 @@
 package com.example.cloneproject15.dto;
 
 import com.example.cloneproject15.entity.ChatRoom;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
 @Getter
 @Setter
-//@Builder
+@NoArgsConstructor
 public class ChatRoomDto {
     private String roomId;
     private String roomName;
     private String host;
-    //private List<String> guest;
 
     public ChatRoomDto(ChatRoom chatRoom) {
         this.roomId = chatRoom.getRoomId();
@@ -28,6 +24,5 @@ public class ChatRoomDto {
         this.roomName = roomName;
         this.host = host;
     }
-
 
 }

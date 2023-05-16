@@ -5,7 +5,8 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class EnterUserDto{
+public class EnterUserDto {
+
     private String sender;
     private String userId;
     private String roomId;
@@ -18,3 +19,4 @@ public class EnterUserDto{
         this.image_url = image_url;
     }
 }
+

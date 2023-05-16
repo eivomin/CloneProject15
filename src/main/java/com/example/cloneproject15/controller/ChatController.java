@@ -64,74 +64,89 @@ public class ChatController {
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
 
-    @GetMapping("/chat/{roomId}")
-    public EnterUserDto findChatRoom(@PathVariable String roomId, @AuthenticationPrincipal UserDetailsImpl userDetails){
-        return chatService.findRoom(roomId, userDetails.getUser().getUsername());
-    }
-
     @Operation(summary = "채팅방 생성 API" , description = "새로운 채팅방 생성")
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "채팅방 생성 완료" )})
     @PostMapping("/chat")
     public ResponseDto createChatRoom(@RequestBody ChatRoomDto chatRoomDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        chatRoomDto.setHost(userDetails.getUsername());
+        chatRoomDto.setHost(userDetails.getUser().getUsername());
         return chatService.createChatRoom(chatRoomDto.getRoomName(), chatRoomDto.getHost());
+    }
+
+    @Operation(summary = "채팅방  API" , description = "새로운 채팅방 생성")
+    @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "채팅방 생성 완료" )})
+    @GetMapping("/chat/{roomId}")
+    public EnterUserDto findChatRoom(@PathVariable String roomId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        System.out.println("userDetails = " + userDetails.getUser().getUsername());
+        return chatService.findRoom(roomId, userDetails.getUser().getUsername());
     }
 
     @MessageMapping("/chat/enter")
     @SendTo("/sub/chat/room")
-    public ResponseDto enterChatRoom(@RequestBody ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
+    public void enterChatRoom(@RequestBody ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
         Thread.sleep(500); // simulated delay
         ChatDto newchatdto = chatService.enterChatRoom(chatDto, headerAccessor);
 //        User user = userNameCheck(chatDto.getSender());
 //        ChatRoom room = roomIdCheck(chatDto.getRoomId());
 //        user.enterRoom(room);  // --->transactional?
         msgOperation.convertAndSend("/sub/chat/room" + chatDto.getRoomId(), newchatdto);
-        return ResponseDto.setSuccess("enter room success", chatDto.getRoomId());
     }
+
+//    @MessageMapping("/chat/send")
+//    @SendTo("/sub/chat/room")
+//    @Transactional
+//    public void sendChatRoom(@RequestBody ChatDto chatDto, @RequestParam(value = "image", required = false) MultipartFile image, SimpMessageHeaderAccessor headerAccessor) throws Exception {
+//        Thread.sleep(500); // simulated delay
+//        ChatRoom room = roomIdCheck(chatDto.getRoomId());
+//        User user = userNameCheck(chatDto.getSender());
+//        msgOperation.convertAndSend("/sub/chat/room" + chatDto.getRoomId(), chatDto);
+//
+//       //Chat chat = new Chat(chatDto, room, user);
+//
+//        //image -> url로 변경
+//        //service단으로 옮길 예정
+//        //새로운 파일명 부여를 위한 현재 시간 알아내기
+//        LocalDateTime now = LocalDateTime.now();
+//        int hour = now.getHour();
+//        int minute = now.getMinute();
+//        int second = now.getSecond();
+//        int millis = now.get(ChronoField.MILLI_OF_SECOND);
+//
+//        String image_url = null;
+//
+//        if(image != null){
+//            //새로 부여한 이미지 명
+//            String newFileName = "image"+hour+minute+second+millis;
+//            String fileExtension = '.'+image.getOriginalFilename().replaceAll("^.*\\.(.*)$", "$1");
+//            String imageName = S3_BUCKET_PREFIX + newFileName + fileExtension;
+//
+//            //메타데이터 설정
+//            ObjectMetadata objectMetadata = new ObjectMetadata();
+//            objectMetadata.setContentType(image.getContentType());
+//            objectMetadata.setContentLength(image.getSize());
+//
+//            InputStream inputStream = image.getInputStream();
+//
+//            amazonS3.putObject(new PutObjectRequest(bucketName, imageName, inputStream, objectMetadata)
+//                    .withCannedAcl(CannedAccessControlList.PublicRead));
+//            image_url = amazonS3.getUrl(bucketName, imageName).toString();
+//        }
+//
+//       Chat chat = new Chat(chatDto, image_url, room, user);
+//
+//       chatRepository.save(chat);
+//    }
 
     @MessageMapping("/chat/send")
     @SendTo("/sub/chat/room")
     @Transactional
-    public void sendChatRoom(@RequestBody ChatDto chatDto, @RequestParam(value = "image", required = false) MultipartFile image, SimpMessageHeaderAccessor headerAccessor) throws Exception {
+    public void sendChatRoom(@RequestBody ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
         Thread.sleep(500); // simulated delay
         ChatRoom room = roomIdCheck(chatDto.getRoomId());
         User user = userNameCheck(chatDto.getSender());
         msgOperation.convertAndSend("/sub/chat/room" + chatDto.getRoomId(), chatDto);
+        Chat chat = new Chat(chatDto, room, user);
 
-       //Chat chat = new Chat(chatDto, room, user);
-        
-        //image -> url로 변경 
-        //service단으로 옮길 예정
-        //새로운 파일명 부여를 위한 현재 시간 알아내기
-        LocalDateTime now = LocalDateTime.now();
-        int hour = now.getHour();
-        int minute = now.getMinute();
-        int second = now.getSecond();
-        int millis = now.get(ChronoField.MILLI_OF_SECOND);
-
-        String image_url = null;
-
-        if(image != null){
-            //새로 부여한 이미지 명
-            String newFileName = "image"+hour+minute+second+millis;
-            String fileExtension = '.'+image.getOriginalFilename().replaceAll("^.*\\.(.*)$", "$1");
-            String imageName = S3_BUCKET_PREFIX + newFileName + fileExtension;
-
-            //메타데이터 설정
-            ObjectMetadata objectMetadata = new ObjectMetadata();
-            objectMetadata.setContentType(image.getContentType());
-            objectMetadata.setContentLength(image.getSize());
-
-            InputStream inputStream = image.getInputStream();
-
-            amazonS3.putObject(new PutObjectRequest(bucketName, imageName, inputStream, objectMetadata)
-                    .withCannedAcl(CannedAccessControlList.PublicRead));
-            image_url = amazonS3.getUrl(bucketName, imageName).toString();
-        }
-
-       Chat chat = new Chat(chatDto, image_url, room, user);
-
-       chatRepository.save(chat);
+        chatRepository.save(chat);
     }
 
     @EventListener
