@@ -70,8 +70,8 @@ public class WebSecurityConfig {
         http.authorizeRequests()
                 // login 없이 허용하는 페이지
                 .requestMatchers("/**").permitAll()
-                .requestMatchers("/signup").permitAll()
-                .requestMatchers("/login").permitAll()
+                .requestMatchers("/users/signup").permitAll()
+                .requestMatchers("/users/login").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/read/**").permitAll()
                 .requestMatchers(PERMIT_URL_ARRAY).permitAll()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()

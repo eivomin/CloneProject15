@@ -51,6 +51,7 @@ dependencies {
     // sentry
     implementation 'io.sentry:sentry-logback:1.7.30'
 
+    implementation 'javax.xml.bind:jaxb-api:2.3.0'
 
 
 }

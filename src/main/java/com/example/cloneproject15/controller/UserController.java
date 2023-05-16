@@ -24,6 +24,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "UserController", description = "유저 관련 Controller")
+@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
@@ -80,11 +81,8 @@ public class UserController {
     @Operation(summary = "마이페이지 수정 API" , description = "마이페이지 수정, AccessToken")
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "마이페이지 수정 성공!" )})
     @PutMapping("/mypage")
-//    public ResponseEntity<UserResponseDto> updateMypage(@RequestBody UserRequestDto userRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
     public ResponseEntity<UserResponseDto> updateMypage(@Valid UserRequestDto userRequestDto, @RequestParam(value = "image", required = false) MultipartFile image, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException{
         return userService.updateMypage(userRequestDto, image, userDetails.getUser());
     }
-
-
 
 }

@@ -66,8 +66,8 @@ public class KakaoService {
         }
 
         //response 헤더에 AccessToken / RefreshToken
-        response.addHeader(JwtUtil.ACCESS_KEY, tokenDto.getAccessToken());
-        response.addHeader(JwtUtil.REFRESH_KEY, tokenDto.getRefreshToken());
+        response.addHeader(JwtUtil.ACCESS_KEY, "Bearer "+tokenDto.getAccessToken());
+        response.addHeader(JwtUtil.REFRESH_KEY, "Bearer "+tokenDto.getRefreshToken());
 
         return "로그인 성공";
     }
@@ -161,7 +161,6 @@ public class KakaoService {
 
                 String image_url = kakaoUserInfo.getProfile_image();
 
-                //User(String userid, String password, String username, UserRoleEnum role, Long kakaoid, String email, String image_url, String birthday)
                 kakaoUser = new User("kakao", encodedPassword, kakaoUserInfo.getNickname(), UserRoleEnum.USER, kakaoId, email, image_url, "0000-00-00");
             }
 
