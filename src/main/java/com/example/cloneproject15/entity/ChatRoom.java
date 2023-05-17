@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DialectOverride;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,17 +30,22 @@ public class ChatRoom {
     @OneToMany(mappedBy = "room", cascade = CascadeType.REMOVE)
     private List<Chat> chatLists = new ArrayList<>();
 
-//    @OneToMany
-//    @JoinColumn(name = "chatroom_id")
-//    private List<User> userLists = new ArrayList<>();
-
     @Column(nullable = false)
     private String host;
+
+    @ColumnDefault("0")
+    @Column(nullable = false)
+    private Long headCount;
 
     public ChatRoom(String roomName, String host) {
         this.roomId = UUID.randomUUID().toString();
         this.roomName = roomName;
         this.host = host;
+        this.headCount = 0L;
+    }
+
+    public void updateCount(Long headCount) {
+        this.headCount = headCount;
     }
 
 }

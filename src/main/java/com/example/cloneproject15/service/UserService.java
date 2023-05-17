@@ -14,12 +14,10 @@ import com.example.cloneproject15.exception.ExceptionEnum;
 import com.example.cloneproject15.jwt.JwtUtil;
 import com.example.cloneproject15.repository.RefreshTokenRepository;
 import com.example.cloneproject15.repository.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -71,8 +69,8 @@ public class UserService {
         Optional<User> findUser = userRepository.findByUserid(userid);
 
         if(findUser.isPresent()){
-            sentrySupport.logSimpleMessage((ExceptionEnum.DUPLICATED_USER_NAME).getMessage());
-            throw new ApiException(ExceptionEnum.DUPLICATED_USER_NAME);
+            sentrySupport.logSimpleMessage((ExceptionEnum.DUPLICATED_USER_ID).getMessage());
+            throw new ApiException(ExceptionEnum.DUPLICATED_USER_ID);
         }
 
         //새로운 파일명 부여를 위한 현재 시간 알아내기
@@ -244,11 +242,11 @@ public class UserService {
         return ResponseEntity.status(HttpStatus.OK).body(new UserResponseDto(user));
     }
 
-    @Transactional(readOnly = true)
-    public List<UserResponseDto> checkUserByBirthday(String userid) {
-        List<User> userList = userRepository.findByUserAndBirthday();
-        return userList.stream().map(UserResponseDto::new).collect(Collectors.toList());
-    }
+//    @Transactional(readOnly = true)
+//    public List<UserResponseDto> checkUserByBirthday(String userid) {
+//        List<User> userList = userRepository.findByUserAndBirthday();
+//        return userList.stream().map(UserResponseDto::new).collect(Collectors.toList());
+//    }
 
     @Transactional(readOnly = true)
     public ResponseDto userCheck(String userId) {
@@ -269,7 +267,7 @@ public class UserService {
                 return ResponseDto.set(BAD_REQUEST,"id 크기는 4 이상, 12 이하만 가능합니다.",null);
             }
             else {
-                return ResponseDto.set(OK,"사용가능한 아이디 입니다.", null);
+                return ResponseDto.set(OK,"사용가능한 아이디 입니다.", userId);
             }
         }
     }

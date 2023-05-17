@@ -16,7 +16,7 @@ public enum ExceptionEnum {
     NOT_FOUND_USER(HttpStatus.NOT_FOUND, "404_1", "회원이 존재하지 않습니다."),
 
     // 409 Conflict
-    DUPLICATED_USER_NAME(HttpStatus.CONFLICT, "409", "중복된 아이디가 이미 존재합니다.");
+    DUPLICATED_USER_ID(HttpStatus.CONFLICT, "409", "중복된 아이디가 이미 존재합니다.");
 
     private final HttpStatus status;
     private final String code;

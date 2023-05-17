@@ -12,6 +12,7 @@ public class ChatRoomDto {
     private String roomId;
     private String roomName;
     private String host;
+    private Long headCount;
 
     public ChatRoomDto(ChatRoom chatRoom) {
         this.roomId = chatRoom.getRoomId();

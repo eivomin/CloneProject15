@@ -1,25 +1,3 @@
-const auth = 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMTIiLCJhdXRoIjoiVVNFUiIsImV4cCI6MTY4NDE1MzkyMCwiaWF0IjoxNjg0MTUwMzIwfQ.0RvNclwAzcsDFUGho8lRzDFH9K_myni5feM-A2tXS88';
-
-// 처음 로딩 시 사용자 정보 가져오기 (이름 및 폴더)
-if(auth !== '') {
-    // 로그인한 유저 이름
-    $.ajax({
-        type: 'GET',
-        url: `/mypage`,
-        beforeSend: function (xhr) {
-            xhr.setRequestHeader("ACCESS_KEY", auth);
-        },
-        success: function (response) {
-            console.log(response);
-            $("#my-name").val(response['username']);
-        },
-        error(error, status, request) {
-            console.error(error);
-        }
-    });
-}
-
-
 var stompClient = null;
 
 function setConnected(connected) {
@@ -54,6 +32,7 @@ function enterChatRoom() {
         { 'type' : "ENTER",
             'sender' : $("#my-name").val(),
             'roomId' : $("#connectRoomId").val(),
+            'userId' : $("#my_id").val(),
             'message': ""}));
 }
 
