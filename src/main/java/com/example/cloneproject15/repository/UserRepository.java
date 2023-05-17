@@ -18,11 +18,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findAllByOrderByUsernameDesc();
     List<User> findAllByOrderByModifiedDateDesc();
 
-//    @Query(value = "SELECT u FROM users u WHERE str_to_date(concat(Year((CURDATE())), substr(u.birthday, 5)), '%Y-%m-%d') between CURDATE() and CURDATE()+5", nativeQuery = true)
-//    List<User> findByUserAndBirthday();
+    @Query("SELECT u FROM users u WHERE str_to_date(concat(Year(Date(NOW())),substr(u.birthday, 5)), '%Y-%m-%d') between CURDATE() and CURDATE()+5")
+    List<User> findByUserAndBirthday();
 
-    //Long countByRoomId(String roomId);
-    //Long countAllByRoomIdContaining(String roomId);
     Long countAllByRoom_Id(Long roomId);
 
   }
