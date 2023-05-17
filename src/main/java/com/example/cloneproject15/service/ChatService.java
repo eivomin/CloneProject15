@@ -79,12 +79,12 @@ public class ChatService {
                 .message(nickName + "님 퇴장!! ヽ(*。>Д<)o゜")
                 .build();
 
-//  LEAVE할때 headcount가 0이면 방 삭제
-//        Long headCount = userRepository.countAllByRoom_Id(room.getId());
-//        chatRoom.updateCount(headCount);
-//        if(headCount == 0){
-//            chatRoomRepository.deleteByRoomId(roomId);
-//        }
+        //LEAVE할때 headcount가 0이면 방 삭제
+        Long headCount = userRepository.countAllByRoom_Id(room.getId());
+        room.updateCount(headCount);
+        if(headCount == 0){
+            chatRoomRepository.deleteByRoomId(roomId);
+        }
 
         return chatDto;
     }
