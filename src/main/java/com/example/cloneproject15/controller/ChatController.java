@@ -2,9 +2,6 @@ package com.example.cloneproject15.controller;
 
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.example.cloneproject15.dto.ChatDto;
 import com.example.cloneproject15.dto.ChatRoomDto;
 import com.example.cloneproject15.dto.EnterUserDto;
@@ -57,7 +54,7 @@ public class ChatController {
     private String bucketName;
     private final AmazonS3 amazonS3;
     ///////////////////////////////
-    
+
     private final ChatService chatService;
     private final SimpMessagingTemplate msgOperation;
     private final ChatRepository chatRepository;
@@ -138,6 +135,11 @@ public class ChatController {
     @Transactional
     public void sendChatRoom(@RequestBody ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) throws Exception {
         Thread.sleep(500); // simulated delay
+        System.out.println("headerAccessor.getDestination() = " + headerAccessor.getDestination());
+        System.out.println("headerAccessor.getSessionId() = " + headerAccessor.getSessionId());
+        System.out.println("headerAccessor.getSessionAttributes() = " + headerAccessor.getSessionAttributes());
+        System.out.println("headerAccessor.getSubscriptionId() = " + headerAccessor.getSubscriptionId());
+        System.out.println("headerAccessor.getUser() = " + headerAccessor.getUser());
         ChatRoom room = roomIdCheck(chatDto.getRoomId());
         User user = userNameCheck(chatDto.getSender());
         msgOperation.convertAndSend("/sub/chat/room" + chatDto.getRoomId(), chatDto);

@@ -4,8 +4,10 @@ import com.example.cloneproject15.dto.ChatDto;
 import com.example.cloneproject15.dto.ChatRoomDto;
 import com.example.cloneproject15.dto.EnterUserDto;
 import com.example.cloneproject15.dto.ResponseDto;
+import com.example.cloneproject15.entity.Chat;
 import com.example.cloneproject15.entity.ChatRoom;
 import com.example.cloneproject15.entity.User;
+import com.example.cloneproject15.repository.ChatRepository;
 import com.example.cloneproject15.repository.ChatRoomRepository;
 import com.example.cloneproject15.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ public class ChatService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
+    private final ChatRepository chatRepository;
 
     public ResponseDto createChatRoom(String roomName, String host) {
         //이미 reciever와 sender로 생성된 채팅방이 있는지 확인
@@ -47,7 +50,6 @@ public class ChatService {
         // 예외처리
         //반환 결과를 socket session에 사용자의 id로 저장
         headerAccessor.getSessionAttributes().put("nickname", chatDto.getSender());
-        //headerAccessor.getSessionAttributes().put("userId", chatDto.getUserId());
         headerAccessor.getSessionAttributes().put("roomId", chatDto.getRoomId());
 
         User user = userNameCheck(chatDto.getSender());
@@ -64,8 +66,6 @@ public class ChatService {
     public ChatDto disconnectChatRoom(SimpMessageHeaderAccessor headerAccessor) {
         String roomId = (String) headerAccessor.getSessionAttributes().get("roomId");
         String nickName = (String) headerAccessor.getSessionAttributes().get("nickname");
-        //String userId = (String) headerAccessor.getSessionAttributes().get("userId");
-
         User user = userNameCheck(nickName);
         ChatRoom room = roomIdCheck(roomId);
         user.exitRoom(room);
@@ -78,13 +78,6 @@ public class ChatService {
                 .sender(nickName)
                 .message(nickName + "님 퇴장!! ヽ(*。>Д<)o゜")
                 .build();
-
-//  LEAVE할때 headcount가 0이면 방 삭제
-//        Long headCount = userRepository.countAllByRoom_Id(room.getId());
-//        chatRoom.updateCount(headCount);
-//        if(headCount == 0){
-//            chatRoomRepository.deleteByRoomId(roomId);
-//        }
 
         return chatDto;
     }
@@ -125,6 +118,12 @@ public class ChatService {
     public EnterUserDto findRoom(String roomId, String userName) {
         ChatRoom chatRoom = roomIdCheck(roomId);
         User user = userNameCheck(userName);
-        return new EnterUserDto(user.getUsername(), user.getUserid(), chatRoom.getRoomId(), user.getImage_url());
+        List<Chat> chatList = chatRepository.findAllByRoom_IdOrderByCreatedDateAsc(chatRoom.getId());
+        List<ChatDto> chatDtoList = new ArrayList<>();
+        for (Chat chat : chatList) {
+            ChatDto chatDto = new ChatDto(chat);
+            chatDtoList.add(chatDto);
+        }
+        return new EnterUserDto(userName, user.getUserid(), chatRoom.getRoomId(), user.getImage_url(), chatDtoList);
     }
 }
