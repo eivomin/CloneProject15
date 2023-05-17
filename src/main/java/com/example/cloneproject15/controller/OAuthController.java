@@ -16,11 +16,6 @@ public class OAuthController {
 
     private final KakaoService kakaoService;
 
-    @GetMapping("/board")
-    public ModelAndView board() {
-        return new ModelAndView("index");
-    }
-
     @GetMapping("/oauth/kakao")
     public String kakaoLogin(@RequestParam String code, HttpServletResponse response) throws JsonProcessingException {
         return kakaoService.kakaoLogin(code, response);

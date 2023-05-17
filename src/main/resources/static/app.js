@@ -1,3 +1,4 @@
+
 var stompClient = null;
 
 function setConnected(connected) {
@@ -32,7 +33,7 @@ function enterChatRoom() {
         { 'type' : "ENTER",
             'sender' : $("#my-name").val(),
             'roomId' : $("#connectRoomId").val(),
-            'userId' : $("#my_id").val(),
+            'userId' : "yumin",
             'message': ""}));
 }
 
@@ -41,6 +42,7 @@ function sendMessage() {
         { 'type' : "TALK",
             'sender' : $("#my-name").val(),
             'roomId' : $("#connectRoomId").val(),
+            'userId' : "yumin",
             'message': $("#my-message").val()}));
 }
 

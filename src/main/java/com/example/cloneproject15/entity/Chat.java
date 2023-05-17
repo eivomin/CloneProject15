@@ -1,11 +1,12 @@
 package com.example.cloneproject15.entity;
 
 import com.example.cloneproject15.dto.ChatDto;
-import com.example.cloneproject15.dto.ChatRoomDto;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Entity
+import java.time.LocalDate;
+
+@Entity(name = "TB_CHAT")
 @Getter
 @NoArgsConstructor
 public class Chat extends TimeEntity {
@@ -21,18 +22,28 @@ public class Chat extends TimeEntity {
 
     private String message;
 
+    private String userid;
+
+    @Enumerated(EnumType.STRING)
+    private MessageType type;
+
     @Column(nullable = true)
-    private String iamge_url;
+    private String profile_image;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    public Chat (ChatDto chatDto, ChatRoom room, User user) {
+    public Chat (ChatDto chatDto, ChatRoom room, User user, MessageType type, String profile_image) {
         this.sender = chatDto.getSender();
         this.message = chatDto.getMessage();
         this.room = room;
         this.user = user;
+        this.userid = user.getUserid();
+        this.type = type;
+        this.profile_image = profile_image;
     }
+
+
 
 }

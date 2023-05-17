@@ -1,10 +1,7 @@
 package com.example.cloneproject15.entity;
 
-import com.example.cloneproject15.dto.EnterUserDto;
 import com.example.cloneproject15.dto.UserRequestDto;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity(name = "users")
+@Entity(name = "TB_USERS")
 @Getter
 @NoArgsConstructor
 @Table
@@ -43,10 +40,13 @@ public class User extends TimeEntity{
     private String email;
 
     @Column(nullable = true)
-    private String image_url;
+    private String profile_image;
 
     @Column(nullable = false)
     private String birthday;
+
+    @Column(nullable = true)
+    private String comment;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Chat> chatList = new ArrayList<>();
@@ -55,31 +55,33 @@ public class User extends TimeEntity{
     private ChatRoom room;
 
 
-    public User(String userid, String password, String username, UserRoleEnum role, String image_url, String birthday) {
+    public User(String userid, String password, String username, UserRoleEnum role, String profile_image, String birthday,String comment) {
         this.userid = userid;
         this.password = password;
         this.username = username;
         this.role = role;
-        this.image_url = image_url;
+        this.profile_image = profile_image;
         this.birthday = birthday;
+        this.comment = comment;
     }
 
-    public User(String userid, String password, String username, UserRoleEnum role, Long kakaoid, String email, String image_url, String birthday) {
+    public User(String userid, String password, String username, UserRoleEnum role, Long kakaoid, String email, String profile_image, String birthday) {
         this.userid = userid;
         this.password = password;
         this.username = username;
         this.role = role;
         this.kakaoid = kakaoid;
         this.email = email;
-        this.image_url = image_url;
+        this.profile_image = profile_image;
         this.birthday = birthday;
     }
 
-    public void update(UserRequestDto userRequestDto, String image_url){
+    public void update(UserRequestDto userRequestDto, String profile_image){
         this.password = userRequestDto.getPassword();
         this.username = userRequestDto.getUsername();
         this.birthday = userRequestDto.getBirthday();
-        this.image_url = image_url;
+        this.comment = userRequestDto.getComment();
+        this.profile_image = profile_image;
     }
 
 

@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -80,14 +79,14 @@ public class UserController {
     public ResponseEntity<UserResponseDto> updateMypage(@Valid UserRequestDto userRequestDto, @RequestParam(value = "image", required = false) MultipartFile image, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException{
         return userService.updateMypage(userRequestDto, image, userDetails.getUser());
     }
-//
-//    @Operation(summary = "유저 최신 생일 목록조회 API" , description = "유저 최신 생일 목록조회, AccessToken")
-//    @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "유저 최신 생일 목록조회 성공!" )})
-//    @GetMapping("/mypage/birthday")
-//    public List<UserResponseDto> checkUserByBirthday(@AuthenticationPrincipal UserDetailsImpl userDetails){
-//        String userid = userDetails.getUsername();
-//        return userService.checkUserByBirthday(userid);
-//    }
+
+    @Operation(summary = "유저 최신 생일 목록조회 API" , description = "유저 최신 생일 목록조회, AccessToken")
+    @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "유저 최신 생일 목록조회 성공!" )})
+    @GetMapping("/mypage/birthday")
+    public List<UserResponseDto> checkUserByBirthday(@AuthenticationPrincipal UserDetailsImpl userDetails){
+        String userid = userDetails.getUsername();
+        return userService.checkUserByBirthday(userid);
+    }
 
     @Operation(summary = "유저 아이디 중복 여부" , description = "중복 여부 확인")
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "아이디 중복여부 확인" )})

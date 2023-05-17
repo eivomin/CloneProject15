@@ -16,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import java.io.IOException;
 
 @Slf4j
@@ -31,7 +30,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        // JWT 토큰을 해석하여 추출
         String access_token = jwtUtil.resolveToken(request, jwtUtil.ACCESS_KEY);
         String refresh_token = jwtUtil.resolveToken(request, jwtUtil.REFRESH_KEY);
         // 토큰이 존재하면 유효성 검사를 수행하고, 유효하지 않은 경우 예외 처리

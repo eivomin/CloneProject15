@@ -10,19 +10,22 @@ public class UserResponseDto {
     private String userid;
     private String username;
     private String birthday;
-    private String image_url;
+    private String profile_image;
+    private String comment;
 
-    public UserResponseDto(String userid, String username, String birthday, String image_url) {
+    public UserResponseDto(String userid, String username, String birthday, String profile_image, String comment) {
         this.userid = userid;
         this.username = username;
         this.birthday = birthday;
-        this.image_url = image_url;
+        this.profile_image = profile_image;
+        this.comment = comment;
     }
 
     public UserResponseDto(User user){
         this.userid = user.getUserid();
         this.username = user.getUsername();
         this.birthday = user.getBirthday();
-        this.image_url = user.getImage_url();
+        this.profile_image = user.getProfile_image();
+        this.comment = user.getComment();
     }
 }

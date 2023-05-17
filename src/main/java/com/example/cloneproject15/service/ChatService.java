@@ -6,6 +6,7 @@ import com.example.cloneproject15.dto.EnterUserDto;
 import com.example.cloneproject15.dto.ResponseDto;
 import com.example.cloneproject15.entity.Chat;
 import com.example.cloneproject15.entity.ChatRoom;
+import com.example.cloneproject15.entity.MessageType;
 import com.example.cloneproject15.entity.User;
 import com.example.cloneproject15.repository.ChatRepository;
 import com.example.cloneproject15.repository.ChatRoomRepository;
@@ -15,9 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -49,10 +48,13 @@ public class ChatService {
         ChatRoom chatRoom = validExistChatRoom(chatDto.getRoomId());
         // 예외처리
         //반환 결과를 socket session에 사용자의 id로 저장
-        headerAccessor.getSessionAttributes().put("nickname", chatDto.getSender());
+        //headerAccessor.getSessionAttributes().put("userId", chatDto.getUserId());
         headerAccessor.getSessionAttributes().put("roomId", chatDto.getRoomId());
+        headerAccessor.getSessionAttributes().put("nickName", chatDto.getSender());
 
-        User user = userNameCheck(chatDto.getSender());
+
+        //User user = userNameCheck(chatDto.getSender());
+        User user = userIDCheck(chatDto.getUserId());
         ChatRoom room = roomIdCheck(chatDto.getRoomId());
         user.enterRoom(room);
 
@@ -65,15 +67,17 @@ public class ChatService {
 
     public ChatDto disconnectChatRoom(SimpMessageHeaderAccessor headerAccessor) {
         String roomId = (String) headerAccessor.getSessionAttributes().get("roomId");
-        String nickName = (String) headerAccessor.getSessionAttributes().get("nickname");
-        User user = userNameCheck(nickName);
+        String userId = (String) headerAccessor.getSessionAttributes().get("userId");
+        String nickName = (String) headerAccessor.getSessionAttributes().get("nickName");
+        //User user = userNameCheck(nickName);
+        User user = userIDCheck(userId);
         ChatRoom room = roomIdCheck(roomId);
         user.exitRoom(room);
 
 //        chatRoomRepository.deleteByRoomId(roomId);
 
         ChatDto chatDto = ChatDto.builder()
-                .type(ChatDto.MessageType.LEAVE)
+                .type(MessageType.LEAVE)
                 .roomId(roomId)
                 .sender(nickName)
                 .message(nickName + "님 퇴장!! ヽ(*。>Д<)o゜")
@@ -122,6 +126,13 @@ public class ChatService {
         );
     }
 
+    //유저 확인 (추가)
+    public User userIDCheck(String userId) {
+        return userRepository.findByUserid(userId).orElseThrow(
+                () -> new IllegalArgumentException("존재하지 않는 유저입니다.")
+        );
+    }
+
     public EnterUserDto findRoom(String roomId, String userName) {
         ChatRoom chatRoom = roomIdCheck(roomId);
         User user = userNameCheck(userName);
@@ -131,6 +142,6 @@ public class ChatService {
             ChatDto chatDto = new ChatDto(chat);
             chatDtoList.add(chatDto);
         }
-        return new EnterUserDto(userName, user.getUserid(), chatRoom.getRoomId(), user.getImage_url(), chatDtoList);
+        return new EnterUserDto(userName, user.getUserid(), chatRoom.getRoomId(), user.getProfile_image(), chatDtoList);
     }
 }

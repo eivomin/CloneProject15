@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@Entity
+@Entity(name = "TB_REFRESHTOKEN")
 @NoArgsConstructor
 public class RefreshToken {
     @Id

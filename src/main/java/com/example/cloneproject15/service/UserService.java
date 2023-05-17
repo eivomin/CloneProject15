@@ -24,14 +24,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
 import java.util.*;
 import java.util.stream.Collectors;
-
 import static com.example.cloneproject15.dto.StatusCode.BAD_REQUEST;
 import static com.example.cloneproject15.dto.StatusCode.OK;
 
@@ -88,6 +86,20 @@ public class UserService {
             String fileExtension = '.'+image.getOriginalFilename().replaceAll("^.*\\.(.*)$", "$1");
             String imageName = S3_BUCKET_PREFIX + newFileName + fileExtension;
 
+            String[] extensionArray = {".png", ".jpeg", ".jpg", ".webp", ".gif"};
+
+            List<String> extensionList = new ArrayList<>(Arrays.asList(extensionArray));
+
+            //파일 확장자 검사
+            if(!extensionList.contains(fileExtension)){
+                throw new ApiException(ExceptionEnum.UNAUTHORIZED_FILE);
+            }
+
+            //파일 크기 검사
+            if(image.getSize() > 20971520){
+                throw new ApiException(ExceptionEnum.MAX_FILE_SIZE);
+            }
+
             //메타데이터 설정
             ObjectMetadata objectMetadata = new ObjectMetadata();
             objectMetadata.setContentType(image.getContentType());
@@ -104,7 +116,7 @@ public class UserService {
         UserRoleEnum role = UserRoleEnum.USER;
 
         userRepository.save(new User(requestDto.getUserid(), password, requestDto.getUsername(),
-                role, image_url, requestDto.getBirthday()));
+                role, image_url, requestDto.getBirthday(), requestDto.getComment()));
         return new StatusResponseDto("회원가입 성공");
     }
 
@@ -198,6 +210,7 @@ public class UserService {
 
         String username = userRequestDto.getUsername();
         String birthday = userRequestDto.getBirthday();
+        String comment = userRequestDto.getComment();
 
         User findUser = userRepository.findById(user.getId()).orElseThrow(
                 () -> new ApiException(ExceptionEnum.NOT_FOUND_USER)
@@ -218,13 +231,27 @@ public class UserService {
         int millis = now.get(ChronoField.MILLI_OF_SECOND);
 
         //기존 이미지 url로 설정
-        String image_url = user.getImage_url();
+        String profile_image = user.getProfile_image();
 
         if(image != null){
             //새로 부여한 이미지 명
             String newFileName = "image"+hour+minute+second+millis;
             String fileExtension = '.'+image.getOriginalFilename().replaceAll("^.*\\.(.*)$", "$1");
             String imageName = S3_BUCKET_PREFIX + newFileName + fileExtension;
+
+            String[] extensionArray = {".png", ".jpeg", ".jpg", ".webp", ".gif"};
+
+            List<String> extensionList = new ArrayList<>(Arrays.asList(extensionArray));
+
+            //파일 확장자 검사
+            if(!extensionList.contains(fileExtension)){
+                throw new ApiException(ExceptionEnum.UNAUTHORIZED_FILE);
+            }
+
+            //파일 크기 검사
+            if(image.getSize() > 20971520){
+                throw new ApiException(ExceptionEnum.MAX_FILE_SIZE);
+            }
 
             //메타데이터 설정
             ObjectMetadata objectMetadata = new ObjectMetadata();
@@ -235,18 +262,20 @@ public class UserService {
 
             amazonS3.putObject(new PutObjectRequest(bucketName, imageName, inputStream, objectMetadata)
                     .withCannedAcl(CannedAccessControlList.PublicRead));
-            image_url = amazonS3.getUrl(bucketName, imageName).toString();
+            profile_image = amazonS3.getUrl(bucketName, imageName).toString();
         }
 
-        findUser.update(userRequestDto, image_url);
+        userRequestDto.setPassword(password);
+        findUser.update(userRequestDto, profile_image);
         return ResponseEntity.status(HttpStatus.OK).body(new UserResponseDto(user));
+
     }
 
-//    @Transactional(readOnly = true)
-//    public List<UserResponseDto> checkUserByBirthday(String userid) {
-//        List<User> userList = userRepository.findByUserAndBirthday();
-//        return userList.stream().map(UserResponseDto::new).collect(Collectors.toList());
-//    }
+    @Transactional(readOnly = true)
+    public List<UserResponseDto> checkUserByBirthday(String userid) {
+        List<User> userList = userRepository.findByUserAndBirthday();
+        return userList.stream().map(UserResponseDto::new).collect(Collectors.toList());
+    }
 
     @Transactional(readOnly = true)
     public ResponseDto userCheck(String userId) {
