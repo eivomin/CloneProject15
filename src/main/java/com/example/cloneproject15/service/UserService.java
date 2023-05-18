@@ -181,19 +181,23 @@ public class UserService {
         return ResponseEntity.status(HttpStatus.OK).body(new UserResponseDto(user));
     }
 
-    public ResponseEntity<UserResponseDto> updateMypage(UserRequestDto userRequestDto, MultipartFile image, User user)throws IOException {
+    // 마이페이지 수정
+    @Transactional
+    public ResponseEntity<UserResponseDto> updateMypage(UserRequestDto userRequestDto, User user)throws IOException {
 
         User findUser = userRepository.findById(user.getId()).orElseThrow(
                 () -> new ApiException(ExceptionEnum.NOT_FOUND_USER)
         );
 
-        if(!userRequestDto.getPassword().matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$")){ // 비밀번호 정규식 체크
-            sentrySupport.logSimpleMessage((ExceptionEnum.PASSWAORD_REGEX).getMessage());
-            throw new ApiException(ExceptionEnum.PASSWAORD_REGEX);
-        }
 
-        String password = passwordEncoder.encode(userRequestDto.getPassword());
-
+            if(!userRequestDto.getPassword().matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$")){ // 비밀번호 정규식 체크
+                sentrySupport.logSimpleMessage((ExceptionEnum.PASSWAORD_REGEX).getMessage());
+                throw new ApiException(ExceptionEnum.PASSWAORD_REGEX);
+            }
+            String password = passwordEncoder.encode(userRequestDto.getPassword());
+/*
+        //새로운 파일명 부여를 위한 현재 시간 알아내기
+=======
         LocalDateTime now = LocalDateTime.now();
         int hour = now.getHour();
         int minute = now.getMinute();
@@ -229,9 +233,9 @@ public class UserService {
                     .withCannedAcl(CannedAccessControlList.PublicRead));
             profile_image = amazonS3.getUrl(bucketName, imageName).toString();
         }
-
-        userRequestDto.setPassword(password);
-        findUser.update(userRequestDto, profile_image);
+*/
+//        userRequestDto.setPassword(password);
+        findUser.update(userRequestDto);
         return ResponseEntity.status(HttpStatus.OK).body(new UserResponseDto(user));
 
     }

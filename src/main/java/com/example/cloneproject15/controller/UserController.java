@@ -76,8 +76,9 @@ public class UserController {
     @Operation(summary = "마이페이지 수정 API" , description = "마이페이지 수정, AccessToken")
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "마이페이지 수정 성공!" )})
     @PutMapping("/mypage")
-    public ResponseEntity<UserResponseDto> updateMypage(@Valid UserRequestDto userRequestDto, @RequestParam(value = "image", required = false) MultipartFile image, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException{
-        return userService.updateMypage(userRequestDto, image, userDetails.getUser());
+    public ResponseEntity<UserResponseDto> updateMypage(@RequestBody UserRequestDto userRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException{
+//        public ResponseEntity<UserResponseDto> updateMypage(@Valid UserRequestDto userRequestDto, @RequestParam(value = "image", required = false) MultipartFile image, @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException{
+        return userService.updateMypage(userRequestDto, userDetails.getUser());
     }
 
     @Operation(summary = "유저 최신 생일 목록조회 API" , description = "유저 최신 생일 목록조회, AccessToken")
