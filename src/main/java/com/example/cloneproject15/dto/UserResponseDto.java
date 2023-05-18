@@ -13,11 +13,14 @@ public class UserResponseDto {
     private String profile_image;
     private String comment;
 
+    private String password;
+
     public UserResponseDto(User user){
         this.userid = user.getUserid();
         this.username = user.getUsername();
         this.birthday = user.getBirthday();
         this.profile_image = user.getProfile_image();
         this.comment = user.getComment();
+        this.password = user.getPassword();
     }
 }
