@@ -29,10 +29,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JwtUtil {
 
-    public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String AUTHORIZATION_KEY = "auth";
     private static final String BEARER_PREFIX = "Bearer ";
-    private static final long TOKEN_TIME = 60 * 60 * 1000L;
     private final UserDetailsServiceImpl userDetailsService;
 
     public static final String ACCESS_KEY = "ACCESS_KEY";
@@ -56,7 +54,6 @@ public class JwtUtil {
         key = Keys.hmacShaKeyFor(bytes);
     }
 
-    // header 토큰을 가져오기
     public String resolveToken(HttpServletRequest request, String token) {
         String tokenName = token.equals("ACCESS_KEY") ? ACCESS_KEY : REFRESH_KEY;
         String bearerToken = request.getHeader(tokenName);
@@ -66,7 +63,6 @@ public class JwtUtil {
         return null;
     }
 
-    // 토큰 생성
     public String createToken(String username, UserRoleEnum role, String tokenName) {
         Date date = new Date();
         long tokenType = tokenName.equals("Access") ? ACCESS_TIME : REFRESH_TIME;
@@ -81,7 +77,6 @@ public class JwtUtil {
                         .compact();
     }
 
-    // 토큰 검증
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
@@ -98,18 +93,15 @@ public class JwtUtil {
         return false;
     }
 
-    // 토큰에서 사용자 정보 가져오기
     public String getUserInfoFromToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
     }
 
-    // 인증 객체 생성
     public Authentication createAuthentication(String username) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 
-    //RefreshToken 검증
     public boolean refreshTokenValid(String token) {
         if (!validateToken(token)) return false;
         Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUserid(getUserInfoFromToken(token));
@@ -120,13 +112,11 @@ public class JwtUtil {
     }
 
     public long getExpirationTime(String token) {
-        // 토큰에서 만료 시간 정보를 추출
         Claims claims = Jwts.parser()
                 .setSigningKey(secretKey)
                 .parseClaimsJws(token)
                 .getBody();
 
-        // 현재 시간과 만료 시간의 차이를 계산하여 반환
         Date expirationDate = claims.getExpiration();
         Date now = new Date();
         long diff = (expirationDate.getTime() - now.getTime()) / 1000;
