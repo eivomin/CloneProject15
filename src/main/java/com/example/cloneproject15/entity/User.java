@@ -76,12 +76,12 @@ public class User extends TimeEntity{
         this.birthday = birthday;
     }
 
-    public void update(UserRequestDto userRequestDto, String profile_image){
+    public void update(UserRequestDto userRequestDto){
         this.password = userRequestDto.getPassword();
         this.username = userRequestDto.getUsername();
         this.birthday = userRequestDto.getBirthday();
         this.comment = userRequestDto.getComment();
-        this.profile_image = profile_image;
+//        this.profile_image = profile_image;
     }
 
 

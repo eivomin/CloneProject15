@@ -206,7 +206,7 @@ public class UserService {
 
     // 마이페이지 수정
     @Transactional
-    public ResponseEntity<UserResponseDto> updateMypage(UserRequestDto userRequestDto, MultipartFile image, User user)throws IOException {
+    public ResponseEntity<UserResponseDto> updateMypage(UserRequestDto userRequestDto, User user)throws IOException {
 
         String username = userRequestDto.getUsername();
         String birthday = userRequestDto.getBirthday();
@@ -216,13 +216,17 @@ public class UserService {
                 () -> new ApiException(ExceptionEnum.NOT_FOUND_USER)
         );
 
-        if(!userRequestDto.getPassword().matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$")){ // 비밀번호 정규식 체크
-            sentrySupport.logSimpleMessage((ExceptionEnum.PASSWAORD_REGEX).getMessage());
-            throw new ApiException(ExceptionEnum.PASSWAORD_REGEX);
-        }
 
-        String password = passwordEncoder.encode(userRequestDto.getPassword());
-
+//        if(!userRequestDto.getPassword().isEmpty()) {
+            if(!userRequestDto.getPassword().matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$")){ // 비밀번호 정규식 체크
+                sentrySupport.logSimpleMessage((ExceptionEnum.PASSWAORD_REGEX).getMessage());
+                throw new ApiException(ExceptionEnum.PASSWAORD_REGEX);
+            }
+            String password = passwordEncoder.encode(userRequestDto.getPassword());
+//        }else{
+//            String password = user.getPassword();
+//        }
+/*
         //새로운 파일명 부여를 위한 현재 시간 알아내기
         LocalDateTime now = LocalDateTime.now();
         int hour = now.getHour();
@@ -264,9 +268,9 @@ public class UserService {
                     .withCannedAcl(CannedAccessControlList.PublicRead));
             profile_image = amazonS3.getUrl(bucketName, imageName).toString();
         }
-
-        userRequestDto.setPassword(password);
-        findUser.update(userRequestDto, profile_image);
+*/
+//        userRequestDto.setPassword(password);
+        findUser.update(userRequestDto);
         return ResponseEntity.status(HttpStatus.OK).body(new UserResponseDto(user));
 
     }
