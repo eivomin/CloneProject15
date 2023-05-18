@@ -24,12 +24,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
 import java.util.*;
 import java.util.stream.Collectors;
+
 import static com.example.cloneproject15.dto.StatusCode.BAD_REQUEST;
 import static com.example.cloneproject15.dto.StatusCode.OK;
 
@@ -56,7 +58,7 @@ public class UserService {
         String username = requestDto.getUsername();
         String birthday = requestDto.getBirthday();
 
-        if(!requestDto.getPassword().matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$")){ // 비밀번호 정규식 체크
+        if (!requestDto.getPassword().matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$")) { // 비밀번호 정규식 체크
             sentrySupport.logSimpleMessage((ExceptionEnum.PASSWAORD_REGEX).getMessage());
             throw new ApiException(ExceptionEnum.PASSWAORD_REGEX);
         }
@@ -65,7 +67,7 @@ public class UserService {
 
         Optional<User> findUser = userRepository.findByUserid(userid);
 
-        if(findUser.isPresent()){
+        if (findUser.isPresent()) {
             sentrySupport.logSimpleMessage((ExceptionEnum.DUPLICATED_USER_ID).getMessage());
             throw new ApiException(ExceptionEnum.DUPLICATED_USER_ID);
         }
@@ -78,20 +80,20 @@ public class UserService {
 
         String image_url = "https://chattingroom.s3.ap-northeast-2.amazonaws.com/S3image171054617.jpg";
 
-        if(image != null){
-            String newFileName = "image"+hour+minute+second+millis;
-            String fileExtension = '.'+image.getOriginalFilename().replaceAll("^.*\\.(.*)$", "$1");
+        if (image != null) {
+            String newFileName = "image" + hour + minute + second + millis;
+            String fileExtension = '.' + image.getOriginalFilename().replaceAll("^.*\\.(.*)$", "$1");
             String imageName = S3_BUCKET_PREFIX + newFileName + fileExtension;
 
             String[] extensionArray = {".png", ".jpeg", ".jpg", ".webp", ".gif"};
 
             List<String> extensionList = new ArrayList<>(Arrays.asList(extensionArray));
 
-            if(!extensionList.contains(fileExtension)){
+            if (!extensionList.contains(fileExtension)) {
                 throw new ApiException(ExceptionEnum.UNAUTHORIZED_FILE);
             }
 
-            if(image.getSize() > 20971520){
+            if (image.getSize() > 20971520) {
                 throw new ApiException(ExceptionEnum.MAX_FILE_SIZE);
             }
 
@@ -119,12 +121,12 @@ public class UserService {
 
         Optional<User> user = userRepository.findByUserid(userid);
 
-        if(user.isEmpty()){
+        if (user.isEmpty()) {
             sentrySupport.logSimpleMessage((ExceptionEnum.NOT_FOUND_USER).getMessage());
             throw new ApiException(ExceptionEnum.NOT_FOUND_USER);
         }
 
-        if(!passwordEncoder.matches(password, user.get().getPassword())){
+        if (!passwordEncoder.matches(password, user.get().getPassword())) {
             sentrySupport.logSimpleMessage((ExceptionEnum.BAD_REQUEST).getMessage());
             throw new ApiException(ExceptionEnum.BAD_REQUEST);
         }
@@ -133,11 +135,11 @@ public class UserService {
 
         Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUserid(userid);
 
-        if(refreshToken.isPresent()){
+        if (refreshToken.isPresent()) {
             refreshTokenRepository.save(refreshToken.get().updateToken(tokenDto.getRefreshToken()));
-        } else{
-          RefreshToken newToken = new RefreshToken(tokenDto.getRefreshToken(), userid);
-          refreshTokenRepository.save(newToken);
+        } else {
+            RefreshToken newToken = new RefreshToken(tokenDto.getRefreshToken(), userid);
+            refreshTokenRepository.save(newToken);
         }
 
         response.addHeader(JwtUtil.ACCESS_KEY, tokenDto.getAccessToken());
@@ -157,7 +159,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public List<UserResponseDto> getUsers(String userid) {
         Optional<User> findUser = userRepository.findByUserid(userid);
-        if(findUser.isPresent()) {
+        if (findUser.isPresent()) {
             List<User> userList = userRepository.findAllByOrderByUsernameDesc();
             return userList.stream().map(UserResponseDto::new).collect(Collectors.toList());
         }
@@ -166,10 +168,10 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserResponseDto findUserInfo(String userid){
+    public UserResponseDto findUserInfo(String userid) {
         Optional<User> findUser = userRepository.findByUserid(userid);
 
-        if(findUser.isPresent()){
+        if (findUser.isPresent()) {
             return new UserResponseDto(findUser.get());
         }
         sentrySupport.logSimpleMessage((ExceptionEnum.NOT_FOUND_USER).getMessage());
@@ -183,58 +185,19 @@ public class UserService {
 
     // 마이페이지 수정
     @Transactional
-    public ResponseEntity<UserResponseDto> updateMypage(UserRequestDto userRequestDto, User user)throws IOException {
+    public ResponseEntity<UserResponseDto> updateMypage(UserRequestDto userRequestDto, User user) throws IOException {
 
         User findUser = userRepository.findById(user.getId()).orElseThrow(
                 () -> new ApiException(ExceptionEnum.NOT_FOUND_USER)
         );
 
 
-            if(!userRequestDto.getPassword().matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$")){ // 비밀번호 정규식 체크
-                sentrySupport.logSimpleMessage((ExceptionEnum.PASSWAORD_REGEX).getMessage());
-                throw new ApiException(ExceptionEnum.PASSWAORD_REGEX);
-            }
-            String password = passwordEncoder.encode(userRequestDto.getPassword());
-/*
-        //새로운 파일명 부여를 위한 현재 시간 알아내기
-=======
-        LocalDateTime now = LocalDateTime.now();
-        int hour = now.getHour();
-        int minute = now.getMinute();
-        int second = now.getSecond();
-        int millis = now.get(ChronoField.MILLI_OF_SECOND);
-
-        String profile_image = user.getProfile_image();
-
-        if(image != null){
-            String newFileName = "image"+hour+minute+second+millis;
-            String fileExtension = '.'+image.getOriginalFilename().replaceAll("^.*\\.(.*)$", "$1");
-            String imageName = S3_BUCKET_PREFIX + newFileName + fileExtension;
-
-            String[] extensionArray = {".png", ".jpeg", ".jpg", ".webp", ".gif"};
-
-            List<String> extensionList = new ArrayList<>(Arrays.asList(extensionArray));
-
-            if(!extensionList.contains(fileExtension)){
-                throw new ApiException(ExceptionEnum.UNAUTHORIZED_FILE);
-            }
-
-            if(image.getSize() > 20971520){
-                throw new ApiException(ExceptionEnum.MAX_FILE_SIZE);
-            }
-
-            ObjectMetadata objectMetadata = new ObjectMetadata();
-            objectMetadata.setContentType(image.getContentType());
-            objectMetadata.setContentLength(image.getSize());
-
-            InputStream inputStream = image.getInputStream();
-
-            amazonS3.putObject(new PutObjectRequest(bucketName, imageName, inputStream, objectMetadata)
-                    .withCannedAcl(CannedAccessControlList.PublicRead));
-            profile_image = amazonS3.getUrl(bucketName, imageName).toString();
+        if (!userRequestDto.getPassword().matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$")) { // 비밀번호 정규식 체크
+            sentrySupport.logSimpleMessage((ExceptionEnum.PASSWAORD_REGEX).getMessage());
+            throw new ApiException(ExceptionEnum.PASSWAORD_REGEX);
         }
-*/
-//        userRequestDto.setPassword(password);
+        String password = passwordEncoder.encode(userRequestDto.getPassword());
+        userRequestDto.setPassword(password);
         findUser.update(userRequestDto);
         return ResponseEntity.status(HttpStatus.OK).body(new UserResponseDto(user));
 
@@ -252,20 +215,16 @@ public class UserService {
         String namePattern = "[a-zA-Z0-9]{4,12}$";
         int chk = userId.length();
         if (found.isPresent()) {
-            return  ResponseDto.set(BAD_REQUEST,"아이디 중복", null);
-        }
-        else {
+            return ResponseDto.set(BAD_REQUEST, "아이디 중복", null);
+        } else {
             if (!userId.matches(namePattern)) {
                 return ResponseDto.set(BAD_REQUEST, "소문자와 숫자만 입력 가능합니다.", null);
-            }
-            else if(chk < 4) {
-                return  ResponseDto.set(BAD_REQUEST, "id 크기는 4 이상, 12 이하만 가능합니다.", null);
-            }
-            else if(chk > 10) {
-                return ResponseDto.set(BAD_REQUEST,"id 크기는 4 이상, 12 이하만 가능합니다.",null);
-            }
-            else {
-                return ResponseDto.set(OK,"사용가능한 아이디 입니다.", userId);
+            } else if (chk < 4) {
+                return ResponseDto.set(BAD_REQUEST, "id 크기는 4 이상, 12 이하만 가능합니다.", null);
+            } else if (chk > 10) {
+                return ResponseDto.set(BAD_REQUEST, "id 크기는 4 이상, 12 이하만 가능합니다.", null);
+            } else {
+                return ResponseDto.set(OK, "사용가능한 아이디 입니다.", userId);
             }
         }
     }
