@@ -30,14 +30,18 @@ public class ChatRoom {
     @Column(nullable = false)
     private String host;
 
+    @Column
+    private String userid;
+
     @ColumnDefault("0")
     @Column(nullable = false)
     private Long headCount;
 
-    public ChatRoom(String roomName, String host) {
+    public ChatRoom(String roomName, String host, String userid) {
         this.roomId = UUID.randomUUID().toString();
         this.roomName = roomName;
         this.host = host;
+        this.userid = userid;
         this.headCount = 0L;
     }
 

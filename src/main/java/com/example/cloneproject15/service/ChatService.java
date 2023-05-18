@@ -28,7 +28,7 @@ public class ChatService {
     private final UserRepository userRepository;
     private final ChatRepository chatRepository;
 
-    public ResponseDto createChatRoom(String roomName, String host) {
+    public ResponseDto createChatRoom(String roomName, String host, User user) {
         //이미 reciever와 sender로 생성된 채팅방이 있는지 확인
         Optional<ChatRoom> findChatRoom = validExistChatRoom(host, roomName);
         //있으면 ChatRoom의 roomId 반환
@@ -38,7 +38,7 @@ public class ChatService {
         //없으면 receiver와 sender의 방을 생성해주고 roomId 반환
         //ChatRoom newChatRoom = ChatRoom.of(receiver, sender);
         //String roomId, String roomName, String host, String guest
-        ChatRoom newChatRoom = new ChatRoom(roomName, host);
+        ChatRoom newChatRoom = new ChatRoom(roomName, host, user.getUserid());
         chatRoomRepository.save(newChatRoom);
         return ResponseDto.setSuccess("create ChatRoom success", newChatRoom.getRoomId());
     }
@@ -48,7 +48,7 @@ public class ChatService {
         ChatRoom chatRoom = validExistChatRoom(chatDto.getRoomId());
         // 예외처리
         //반환 결과를 socket session에 사용자의 id로 저장
-        //headerAccessor.getSessionAttributes().put("userId", chatDto.getUserId());
+        headerAccessor.getSessionAttributes().put("userId", chatDto.getUserId());
         headerAccessor.getSessionAttributes().put("roomId", chatDto.getRoomId());
         headerAccessor.getSessionAttributes().put("nickName", chatDto.getSender());
 
@@ -67,8 +67,8 @@ public class ChatService {
 
     public ChatDto disconnectChatRoom(SimpMessageHeaderAccessor headerAccessor) {
         String roomId = (String) headerAccessor.getSessionAttributes().get("roomId");
-        String userId = (String) headerAccessor.getSessionAttributes().get("userId");
         String nickName = (String) headerAccessor.getSessionAttributes().get("nickName");
+        String userId = (String) headerAccessor.getSessionAttributes().get("userId");
         //User user = userNameCheck(nickName);
         User user = userIDCheck(userId);
         ChatRoom room = roomIdCheck(roomId);
@@ -80,6 +80,7 @@ public class ChatService {
                 .type(MessageType.LEAVE)
                 .roomId(roomId)
                 .sender(nickName)
+                .userId(userId)
                 .message(nickName + "님 퇴장!! ヽ(*。>Д<)o゜")
                 .build();
 
@@ -108,7 +109,9 @@ public class ChatService {
         List<ChatRoom>chatRoomList = chatRoomRepository.findAll();
         List<ChatRoomDto> chatRoomDtoList = new ArrayList<>();
         for (ChatRoom chatRoom : chatRoomList) {
-            ChatRoomDto chatRoomDto = new ChatRoomDto(chatRoom);
+            Optional<User> findUser = userRepository.findByUserid(chatRoom.getUserid());
+            String profile_image = findUser.get().getProfile_image();
+            ChatRoomDto chatRoomDto = new ChatRoomDto(chatRoom, profile_image);
             chatRoomDtoList.add(chatRoomDto);
         }
         return chatRoomDtoList;

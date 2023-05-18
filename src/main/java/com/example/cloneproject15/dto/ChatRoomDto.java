@@ -13,11 +13,13 @@ public class ChatRoomDto {
     private String roomName;
     private String host;
     private Long headCount;
+    private String profile_image;
 
-    public ChatRoomDto(ChatRoom chatRoom) {
+    public ChatRoomDto(ChatRoom chatRoom, String profile_image) {
         this.roomId = chatRoom.getRoomId();
         this.roomName = chatRoom.getRoomName();
         this.host = chatRoom.getHost();
+        this.profile_image = profile_image;
     }
 
     public ChatRoomDto(String roomId, String roomName, String host) {

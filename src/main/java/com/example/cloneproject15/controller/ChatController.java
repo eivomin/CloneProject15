@@ -73,7 +73,7 @@ public class ChatController {
     @PostMapping("/chat")
     public ResponseDto createChatRoom(@RequestBody ChatRoomDto chatRoomDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         chatRoomDto.setHost(userDetails.getUser().getUsername());
-        return chatService.createChatRoom(chatRoomDto.getRoomName(), chatRoomDto.getHost());
+        return chatService.createChatRoom(chatRoomDto.getRoomName(), chatRoomDto.getHost(), userDetails.getUser());
     }
 
     @Operation(summary = "채팅방  API" , description = "새로운 채팅방 생성")
