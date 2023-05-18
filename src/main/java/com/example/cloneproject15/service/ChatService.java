@@ -1,5 +1,9 @@
 package com.example.cloneproject15.service;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.example.cloneproject15.dto.ChatDto;
 import com.example.cloneproject15.dto.ChatRoomDto;
 import com.example.cloneproject15.dto.EnterUserDto;
@@ -8,21 +12,37 @@ import com.example.cloneproject15.entity.Chat;
 import com.example.cloneproject15.entity.ChatRoom;
 import com.example.cloneproject15.entity.MessageType;
 import com.example.cloneproject15.entity.User;
+import com.example.cloneproject15.exception.ApiException;
+import com.example.cloneproject15.exception.ExceptionEnum;
 import com.example.cloneproject15.repository.ChatRepository;
 import com.example.cloneproject15.repository.ChatRoomRepository;
 import com.example.cloneproject15.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoField;
 import java.util.*;
+
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
 public class ChatService {
+    private static final String S3_BUCKET_PREFIX = "S3";
+
+    @Value("chattingroom")
+    private String bucketName;
+    private final AmazonS3 amazonS3;
 
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
@@ -44,6 +64,13 @@ public class ChatService {
     }
 
     public ChatDto enterChatRoom(ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) {
+
+//        Date date = new Date();
+//        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        String dateformat = format.format(date);
+//
+//        chatDto.setDate(dateformat);
+
         // 채팅방 찾기
         ChatRoom chatRoom = validExistChatRoom(chatDto.getRoomId());
         // 예외처리
@@ -52,8 +79,6 @@ public class ChatService {
         headerAccessor.getSessionAttributes().put("roomId", chatDto.getRoomId());
         headerAccessor.getSessionAttributes().put("nickName", chatDto.getSender());
 
-
-        //User user = userNameCheck(chatDto.getSender());
         User user = userIDCheck(chatDto.getUserId());
         ChatRoom room = roomIdCheck(chatDto.getRoomId());
         user.enterRoom(room);
@@ -69,22 +94,19 @@ public class ChatService {
         String roomId = (String) headerAccessor.getSessionAttributes().get("roomId");
         String nickName = (String) headerAccessor.getSessionAttributes().get("nickName");
         String userId = (String) headerAccessor.getSessionAttributes().get("userId");
-        //User user = userNameCheck(nickName);
-        User user = userIDCheck(userId);
+        User user = userNameCheck(nickName);
         ChatRoom room = roomIdCheck(roomId);
         user.exitRoom(room);
 
-//        chatRoomRepository.deleteByRoomId(roomId);
-
         ChatDto chatDto = ChatDto.builder()
                 .type(MessageType.LEAVE)
+                .userId(userId)
                 .roomId(roomId)
                 .sender(nickName)
                 .userId(userId)
                 .message(nickName + "님 퇴장!! ヽ(*。>Д<)o゜")
                 .build();
 
-        //LEAVE할때 headcount가 0이면 방 삭제
         Long headCount = userRepository.countAllByRoom_Id(room.getId());
         room.updateCount(headCount);
         if(headCount == 0){
@@ -95,7 +117,6 @@ public class ChatService {
     }
 
     public Optional<ChatRoom> validExistChatRoom(String host, String roomName) {
-        //return chatRoomRepository.findByHostAndGuest(host, guest);
         return chatRoomRepository.findByHostAndRoomName(host, roomName);
     }
 
@@ -129,7 +150,6 @@ public class ChatService {
         );
     }
 
-    //유저 확인 (추가)
     public User userIDCheck(String userId) {
         return userRepository.findByUserid(userId).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않는 유저입니다.")
@@ -146,5 +166,61 @@ public class ChatService {
             chatDtoList.add(chatDto);
         }
         return new EnterUserDto(userName, user.getUserid(), chatRoom.getRoomId(), user.getProfile_image(), chatDtoList);
+    }
+
+    public void sendChatRoom(ChatDto chatDto, SimpMessageHeaderAccessor headerAccessor) {
+
+        ChatRoom room = roomIdCheck(chatDto.getRoomId());
+        User user = userIDCheck(chatDto.getUserId());
+        String profile_image = chatDto.getProfile_image();
+        MessageType type = MessageType.TALK;
+
+        Date date = new Date();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String dateformat = format.format(date);
+        chatDto.setDate(dateformat);
+        chatDto.setProfile_image(user.getProfile_image());
+
+        Chat chat = new Chat(chatDto, room, user, type, profile_image);
+        chatRepository.save(chat);
+    }
+
+    public String uploadImage(MultipartFile image) throws IOException {
+        String image_url = "이미지 업로드 실패";
+
+        LocalDateTime now = LocalDateTime.now();
+        int hour = now.getHour();
+        int minute = now.getMinute();
+        int second = now.getSecond();
+        int millis = now.get(ChronoField.MILLI_OF_SECOND);
+
+        if(image != null){
+            String newFileName = "image"+hour+minute+second+millis;
+            String fileExtension = '.'+image.getOriginalFilename().replaceAll("^.*\\.(.*)$", "$1");
+            String imageName = S3_BUCKET_PREFIX + newFileName + fileExtension;
+
+            String[] extensionArray = {".png", ".jpeg", ".jpg", ".webp", ".gif"};
+
+            List<String> extensionList = new ArrayList<>(Arrays.asList(extensionArray));
+
+            if(!extensionList.contains(fileExtension)){
+                throw new ApiException(ExceptionEnum.UNAUTHORIZED_FILE);
+            }
+
+            if(image.getSize() > 20971520){
+                throw new ApiException(ExceptionEnum.MAX_FILE_SIZE);
+            }
+
+            ObjectMetadata objectMetadata = new ObjectMetadata();
+            objectMetadata.setContentType(image.getContentType());
+            objectMetadata.setContentLength(image.getSize());
+
+            InputStream inputStream = image.getInputStream();
+
+            amazonS3.putObject(new PutObjectRequest(bucketName, imageName, inputStream, objectMetadata)
+                    .withCannedAcl(CannedAccessControlList.PublicRead));
+            image_url = amazonS3.getUrl(bucketName, imageName).toString();
+        }
+        return image_url;
     }
 }

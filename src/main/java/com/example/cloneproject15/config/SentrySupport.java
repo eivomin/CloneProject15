@@ -16,7 +16,6 @@ public class SentrySupport {
         EventBuilder eventBuilder = new EventBuilder()
                 .withMessage(msg)
                 .withLevel(Event.Level.ERROR);
-//                .withLogger(SentrySupport.class.getName());
         Sentry.capture(eventBuilder);
     }
 }

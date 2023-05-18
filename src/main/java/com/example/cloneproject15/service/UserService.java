@@ -63,7 +63,6 @@ public class UserService {
 
         String password = passwordEncoder.encode(requestDto.getPassword());
 
-        //중복된 아이디 값 체크
         Optional<User> findUser = userRepository.findByUserid(userid);
 
         if(findUser.isPresent()){
@@ -71,7 +70,6 @@ public class UserService {
             throw new ApiException(ExceptionEnum.DUPLICATED_USER_ID);
         }
 
-        //새로운 파일명 부여를 위한 현재 시간 알아내기
         LocalDateTime now = LocalDateTime.now();
         int hour = now.getHour();
         int minute = now.getMinute();
@@ -81,7 +79,6 @@ public class UserService {
         String image_url = "https://chattingroom.s3.ap-northeast-2.amazonaws.com/S3image171054617.jpg";
 
         if(image != null){
-            //새로 부여한 이미지 명
             String newFileName = "image"+hour+minute+second+millis;
             String fileExtension = '.'+image.getOriginalFilename().replaceAll("^.*\\.(.*)$", "$1");
             String imageName = S3_BUCKET_PREFIX + newFileName + fileExtension;
@@ -90,17 +87,14 @@ public class UserService {
 
             List<String> extensionList = new ArrayList<>(Arrays.asList(extensionArray));
 
-            //파일 확장자 검사
             if(!extensionList.contains(fileExtension)){
                 throw new ApiException(ExceptionEnum.UNAUTHORIZED_FILE);
             }
 
-            //파일 크기 검사
             if(image.getSize() > 20971520){
                 throw new ApiException(ExceptionEnum.MAX_FILE_SIZE);
             }
 
-            //메타데이터 설정
             ObjectMetadata objectMetadata = new ObjectMetadata();
             objectMetadata.setContentType(image.getContentType());
             objectMetadata.setContentLength(image.getSize());
@@ -112,11 +106,10 @@ public class UserService {
             image_url = amazonS3.getUrl(bucketName, imageName).toString();
         }
 
-        //관리자 권한 체크
         UserRoleEnum role = UserRoleEnum.USER;
 
-        userRepository.save(new User(requestDto.getUserid(), password, requestDto.getUsername(),
-                role, image_url, requestDto.getBirthday(), requestDto.getComment()));
+        userRepository.save(new User(userid, password, username,
+                role, image_url, birthday, requestDto.getComment()));
         return new StatusResponseDto("회원가입 성공");
     }
 
@@ -126,22 +119,18 @@ public class UserService {
 
         Optional<User> user = userRepository.findByUserid(userid);
 
-        //사용자 존재하는지 예외처리
         if(user.isEmpty()){
             sentrySupport.logSimpleMessage((ExceptionEnum.NOT_FOUND_USER).getMessage());
             throw new ApiException(ExceptionEnum.NOT_FOUND_USER);
         }
 
-        //비밀번호 확인
         if(!passwordEncoder.matches(password, user.get().getPassword())){
             sentrySupport.logSimpleMessage((ExceptionEnum.BAD_REQUEST).getMessage());
             throw new ApiException(ExceptionEnum.BAD_REQUEST);
         }
 
-        //아이디 정보로 토큰 생성
         TokenDto tokenDto = jwtUtil.creatAllToken(userid, user.get().getRole());
 
-        //Refresh 토큰 있는지 확인
         Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUserid(userid);
 
         if(refreshToken.isPresent()){
@@ -151,7 +140,6 @@ public class UserService {
           refreshTokenRepository.save(newToken);
         }
 
-        //response 헤더에 AccessToken / RefreshToken
         response.addHeader(JwtUtil.ACCESS_KEY, tokenDto.getAccessToken());
         response.addHeader(JwtUtil.REFRESH_KEY, tokenDto.getRefreshToken());
 
@@ -163,18 +151,9 @@ public class UserService {
                 () -> new IllegalArgumentException("리프레시 토큰 없습니다.")
         );
         refreshTokenRepository.delete(refreshToken);
-        //Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUserid(user.getUserid());
         return new StatusResponseDto("로그아웃 성공");
-//        if(refreshToken.isPresent()){
-//            refreshTokenRepository.delete(refreshToken);
-//            return new StatusResponseDto("로그아웃 성공");
-//        }
-//        sentrySupport.logSimpleMessage((ExceptionEnum.NOT_FOUND_USER).getMessage());
-//        throw new ApiException(ExceptionEnum.NOT_FOUND_USER);
     }
 
-
-    //친구 목록 조회
     @Transactional(readOnly = true)
     public List<UserResponseDto> getUsers(String userid) {
         Optional<User> findUser = userRepository.findByUserid(userid);
@@ -186,7 +165,6 @@ public class UserService {
         throw new ApiException(ExceptionEnum.UNAUTHORIZED);
     }
 
-    //특정 친구 조회
     @Transactional(readOnly = true)
     public UserResponseDto findUserInfo(String userid){
         Optional<User> findUser = userRepository.findByUserid(userid);
@@ -198,19 +176,12 @@ public class UserService {
         throw new ApiException(ExceptionEnum.NOT_FOUND_USER);
     }
 
-    // 마이페이지 조회
     @Transactional(readOnly = true)
     public ResponseEntity<UserResponseDto> myPage(User user) {
         return ResponseEntity.status(HttpStatus.OK).body(new UserResponseDto(user));
     }
 
-    // 마이페이지 수정
-    @Transactional
     public ResponseEntity<UserResponseDto> updateMypage(UserRequestDto userRequestDto, MultipartFile image, User user)throws IOException {
-
-        String username = userRequestDto.getUsername();
-        String birthday = userRequestDto.getBirthday();
-        String comment = userRequestDto.getComment();
 
         User findUser = userRepository.findById(user.getId()).orElseThrow(
                 () -> new ApiException(ExceptionEnum.NOT_FOUND_USER)
@@ -223,18 +194,15 @@ public class UserService {
 
         String password = passwordEncoder.encode(userRequestDto.getPassword());
 
-        //새로운 파일명 부여를 위한 현재 시간 알아내기
         LocalDateTime now = LocalDateTime.now();
         int hour = now.getHour();
         int minute = now.getMinute();
         int second = now.getSecond();
         int millis = now.get(ChronoField.MILLI_OF_SECOND);
 
-        //기존 이미지 url로 설정
         String profile_image = user.getProfile_image();
 
         if(image != null){
-            //새로 부여한 이미지 명
             String newFileName = "image"+hour+minute+second+millis;
             String fileExtension = '.'+image.getOriginalFilename().replaceAll("^.*\\.(.*)$", "$1");
             String imageName = S3_BUCKET_PREFIX + newFileName + fileExtension;
@@ -243,17 +211,14 @@ public class UserService {
 
             List<String> extensionList = new ArrayList<>(Arrays.asList(extensionArray));
 
-            //파일 확장자 검사
             if(!extensionList.contains(fileExtension)){
                 throw new ApiException(ExceptionEnum.UNAUTHORIZED_FILE);
             }
 
-            //파일 크기 검사
             if(image.getSize() > 20971520){
                 throw new ApiException(ExceptionEnum.MAX_FILE_SIZE);
             }
 
-            //메타데이터 설정
             ObjectMetadata objectMetadata = new ObjectMetadata();
             objectMetadata.setContentType(image.getContentType());
             objectMetadata.setContentLength(image.getSize());
@@ -272,7 +237,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserResponseDto> checkUserByBirthday(String userid) {
+    public List<UserResponseDto> checkUserByBirthday() {
         List<User> userList = userRepository.findByUserAndBirthday();
         return userList.stream().map(UserResponseDto::new).collect(Collectors.toList());
     }
