@@ -85,8 +85,7 @@ public class UserController {
     @ApiResponses(value ={@ApiResponse(responseCode= "200", description = "유저 최신 생일 목록조회 성공!" )})
     @GetMapping("/mypage/birthday")
     public List<UserResponseDto> checkUserByBirthday(@AuthenticationPrincipal UserDetailsImpl userDetails){
-        String userid = userDetails.getUsername();
-        return userService.checkUserByBirthday(userid);
+        return userService.checkUserByBirthday();
     }
 
     @Operation(summary = "유저 아이디 중복 여부" , description = "중복 여부 확인")

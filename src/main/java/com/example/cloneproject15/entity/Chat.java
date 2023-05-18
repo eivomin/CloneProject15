@@ -2,9 +2,8 @@ package com.example.cloneproject15.entity;
 
 import com.example.cloneproject15.dto.ChatDto;
 import jakarta.persistence.*;
-import lombok.*;
-
-import java.time.LocalDate;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity(name = "TB_CHAT")
 @Getter
