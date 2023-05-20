@@ -1,8 +1,6 @@
 
 # miniproject_hanhae66
 
-![항해66](https://github.com/seunghee58/miniproject_hanhae66/assets/129656095/7893b3ae-5d9e-4f26-8f1e-e6802da9597e)
-
 >개발 기간: 2023.05.12 ~ 2023.05.18</p>🎥 시연영상 [https://www.youtube.com/watch?v=mGZ9BXAWmiE](https://www.youtube.com/watch?v=AM1mPU-ozMU)
 
 ### 🖐카카오톡 클론코딩
@@ -42,12 +40,28 @@ FE git hub : https://github.com/HyoHwanKim/hangHae99-cloneWeek
 <img src="https://img.shields.io/badge/mysql-4479A1?style=for-the-badge&logo=mysql&logoColor=white"> <img src="https://img.shields.io/badge/amazonaws-232F3E?style=for-the-badge&logo=amazonaws&logoColor=white"> <br>
 <img src="https://img.shields.io/badge/git-F05032?style=for-the-badge&logo=git&logoColor=white"> <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white"> <img src="https://img.shields.io/badge/gradle-02303A?style=for-the-badge&logo=gradle&logoColor=white">
 
-## 1️⃣ 회원 관련 기능
+## 💻 기능
+회원가입, 로그인, 로그아웃</br>
+</br>
+채팅</br>
+- 채팅방 생성
+- 채팅방 입장
+- 채팅방 대화
+- 모든 대화상대퇴장시 채팅방 삭제
+- 사진 전송</br>
+</br>
+5일 앞의 생일인 유저 표시</br>
+</br>
+마이페이지</br>
+- 수정기능(미완료)
 
-  
-## 2️⃣ 게시글 관련 기능
+## 🚩 채팅기능 구현을 위해 고민한 것
 
-
-## 🚩 기능 구현을 위해 고민한 것
-
-
+STOMP를 통하여 단순한 채팅기능만 있는 형태에서 채팅방을 만드는 것에대하여 많은 고민을 해보았습니다.</br>
+우리가 생각한 방법은 ChatRoom Entity를 만들어 "방생성 API"를통해 "TB_CHATROOM" 테이블과 매핑을 하였습니다.</br>
+방의 순서를 특정하고 싶지 않아 시간과 관련하여 고유한 값을 주는 "UUID"를 사용하여 방의 ID를 나타내었습니다.</br>
+</sub/chat/room + roomId> 으로 방ID를 구독한 대상에게만 메시지가 보내지도록 하였습니다.</br>
+User가 어느 방에 들어가는지 특정하기 위하여 User에 RoomId를 연관시켜주었고, 해당 RoomId의 수를 세어
+방에 어떤 User가 있는지도 알수 있게 하였습니다.</br>
+이 정보를 바탕으로 방생성 후 모든 유저가 나가서 방의 유저 카운트가 0이되면 방은 자동으로 삭제됩니다.</br>
+사진 전송은 POST 요청을 통하여 전송합니다.
