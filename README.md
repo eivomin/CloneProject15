@@ -52,8 +52,8 @@ FE git hub : https://github.com/HyoHwanKim/hangHae99-cloneWeek
 </br>
 5일 앞의 생일인 유저 표시</br>
 </br>
-마이페이지</br>
-- 수정기능(미완료)
+마이페이지(수정기능 미완료)</br>
+
 
 ## 🚩 채팅기능 구현을 위해 고민한 것
 
