@@ -1,5 +1,5 @@
 
-# miniproject_hanhae66
+# clone project - KaKaoTalk 채팅 클론
 
 >개발 기간: 2023.05.12 ~ 2023.05.18</p>🎥 시연영상 [https://www.youtube.com/watch?v=mGZ9BXAWmiE](https://www.youtube.com/watch?v=AM1mPU-ozMU)
 
@@ -29,7 +29,7 @@ https://www.notion.so/31b54aa077d04d119ca2e5f10c3e22b7?v=8d4e491b55374a5581f611d
 |------|---|
 |조유민(BE팀장)</br>[@eivomin](https://github.com/eivomin)|- 회원가입, 로그인, 로그아웃 API</br>- RefreshToken, AccessToken</br>- 서버 배포</br>- S3|
 |이상언</br>[@eoneee](https://github.com/eoneee)|- 마이페이지</br>- RDS(MySQL) 연결 </br>|
-|김재형</br>[@jaykim12](https://github.com/jaykim12)|-채팅 기능</br>- 검색 기능|
+|김재형</br>[@jaykim12](https://github.com/jaykim12)|- 채팅 기능</br>- 검색 기능|
 |이현규</br>[@OliveLover](https://github.com/OliveLover)|- 채팅 기능</br>- 검색 기능|
 
 FE git hub : https://github.com/HyoHwanKim/hangHae99-cloneWeek
